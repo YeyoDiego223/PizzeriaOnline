@@ -15,7 +15,10 @@
 
         <h4>Selecciona un tamaño:</h4>
 
-        <form>
+        <form asp-controller="Home" asp-action="AgregarAlCarrito" method="post">
+            <input type="hidden" name="pizzaId" value="@Model.Id" />
+
+            <h4><Selecciona un tamaño:</h4>
             @* Aquí mostraremos los tamaños como botones de radio *@
             @foreach (var variante in Model.Variantes.OrderBy(v => v.Tamaño.PrecioBase))
             {

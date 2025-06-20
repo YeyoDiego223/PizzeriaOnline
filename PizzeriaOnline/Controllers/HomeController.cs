@@ -5,11 +5,83 @@ using PizzeriaOnline.Data;
 using PizzeriaOnline.Models;
 using System.Diagnostics;
 using System.Linq;
+using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
+using SQLitePCL;
 
 namespace PizzeriaOnline.Controllers
 {
     public class HomeController : Controller
     {
+        public IActionResult Carrito()
+        {
+            var carritoJson = HttpContext.Session.GetString("Carrito");
+
+            List<CarritoItem> carrito;
+
+            if (carritoJson == null)
+            {
+                // Si no hay nada en la sesión, el carrito es una nueva lista vacía
+                carrito = new List<CarritoItem>();
+            }
+            else
+            {
+                // Si hay algo, lo convertimos de JSON a nuestra lista de objetos
+                carrito = JsonConvert.DeserializeObject<List<CarritoItem>>(carritoJson);
+            }
+
+            // Pasamos la lista (llena o vacía) a la nueva vista que vamos a crear 
+            return View(carrito);
+        }
+
+        [HttpPost] // Este atributo indica que este método solo responde a peticiones POST
+        public IActionResult AgregarAlCarrito(int pizzaId, int tamañoSeleccionadoId, int cantidad)
+        {
+            // 1. Obtener la pizza y el tamaño de la base de datos
+            var tamaño = _context.Tamaños.Find(tamañoSeleccionadoId);
+            var pizza = _context.Pizzas.Find(pizzaId);
+
+            if (tamaño == null || pizza == null)
+            {
+                return NotFound(); // Si no se encuentra el producto, error.
+            }
+
+            // 2. Obtener el carrito de la sesión o crear uno nuevo si no existe
+            var carritoJson = HttpContext.Session.GetString("Carrito");
+            List<CarritoItem> carrito = carritoJson == null
+                ? new List<CarritoItem>()
+                : JsonConvert.DeserializeObject<List<CarritoItem>>(carritoJson);
+
+            // 3. Revisar si el producto ya está en el carrito
+            var itemExistente = carrito.FirstOrDefault(i => i.PizzaId == pizzaId && i.TamañoId == tamañoSeleccionadoId);
+
+            if (itemExistente != null)
+            {
+                // Si ya existe, solo actualizamos la cantidad
+                itemExistente.Cantidad += cantidad;
+            }
+            else
+            {
+                // Si es nuevo, creamos un nuevo CarritoItem y lo añadimos a la lista
+                var nuevoItem = new CarritoItem
+                {
+                    PizzaId = pizzaId,
+                    NombrePizza = pizza.Nombre,
+                    TamañoId = tamañoSeleccionadoId,
+                    NombreTamaño = tamaño.Nombre,
+                    Cantidad = cantidad,
+                    PrecioUnitario = tamaño.PrecioBase // Usamos el precio base del tamaño
+                };
+                carrito.Add(nuevoItem);
+            }
+
+            // 4. Guardar la lista actualizada de vuelta en la sesión
+            HttpContext.Session.SetString("Carrito", JsonConvert.SerializeObject(carrito));
+
+            // 5. Redirigir al usuario de vuelta al menú
+            return RedirectToAction("Index");
+        }
+
         // --- PASO 1 (Declaración del campo) ---
         // Aquí declaramos una variable _context a nivel de la clase.
         // Es 'private' porque solo se usará dentro de esta clase.

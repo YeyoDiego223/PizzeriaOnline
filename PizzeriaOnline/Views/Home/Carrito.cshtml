@@ -1,0 +1,59 @@
+﻿@model List<PizzeriaOnline.Models.CarritoItem>
+@{
+    ViewData["Title"] = "Carrito de Compras";
+}
+
+<h2>Tu Carrito de Compras</h2>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="alert alert-info" role="alert">
+        Tu carrito está vacío. ¡<a asp-action="Index" asp-controller="Home" class="alert-link">Vuelve al menú</a> para añadir algunas pizzas!
+    </div>
+}
+else
+{
+    <table class="table table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Producto</th>
+                <th>Tamaño</th>
+                <th class="text-end">Precio</th>
+                <th class="text-center">Cantidad</th>
+                <th class="text-end">Subtotal</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.NombrePizza</td>
+                    <td>@item.NombreTamaño</td>
+                    <td class="text-end">@item.PrecioUnitario.ToString("C")</td>
+                    <td class="text-center">@item.Cantidad</td>
+                    <td class="text-end">@item.Subtotal.ToString("C")</td>
+                    <td class="text-center">
+                        <a href="#" class="btn btn-danger btn-sm">Quitar</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="4" class="text-end fs-4"><strong>Total:</strong></td>
+                <td class="text-end fs-4">
+                    <strong>
+                        @Model.Sum(item => item.Subtotal).ToString("C")
+                    </strong>
+                </td>
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="text-end mt-4">
+        <a asp-action="Index" asp-controller="Home" class="btn btn-secondary">Seguir Comprando</a>
+        <a href="#" class="btn btn-success btn-lg">Proceder al Pago</a>
+    </div>
+}

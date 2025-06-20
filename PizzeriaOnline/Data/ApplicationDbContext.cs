@@ -77,6 +77,8 @@ namespace PizzeriaOnline.Data
 
         public DbSet<Pizza> Pizzas { get; set; }
         public DbSet<Ingredientes> Ingredientes { get; set; }
+        public DbSet<Tamaño> Tamaños { get; set; }
+        public DbSet<VariantePizza> VariantePizzas { get; set; }
     }
 
 }
