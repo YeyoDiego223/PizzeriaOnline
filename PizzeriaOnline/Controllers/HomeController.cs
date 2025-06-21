@@ -8,6 +8,8 @@ using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using SQLitePCL;
+using PizzeriaOnline.ViewModels;
+using NuGet.Protocol;
 
 namespace PizzeriaOnline.Controllers
 {
@@ -34,53 +36,6 @@ namespace PizzeriaOnline.Controllers
             return View(carrito);
         }
 
-        [HttpPost] // Este atributo indica que este método solo responde a peticiones POST
-        public IActionResult AgregarAlCarrito(int pizzaId, int tamañoSeleccionadoId, int cantidad)
-        {
-            // 1. Obtener la pizza y el tamaño de la base de datos
-            var tamaño = _context.Tamaños.Find(tamañoSeleccionadoId);
-            var pizza = _context.Pizzas.Find(pizzaId);
-
-            if (tamaño == null || pizza == null)
-            {
-                return NotFound(); // Si no se encuentra el producto, error.
-            }
-
-            // 2. Obtener el carrito de la sesión o crear uno nuevo si no existe
-            var carritoJson = HttpContext.Session.GetString("Carrito");
-            List<CarritoItem> carrito = carritoJson == null
-                ? new List<CarritoItem>()
-                : JsonConvert.DeserializeObject<List<CarritoItem>>(carritoJson);
-
-            // 3. Revisar si el producto ya está en el carrito
-            var itemExistente = carrito.FirstOrDefault(i => i.PizzaId == pizzaId && i.TamañoId == tamañoSeleccionadoId);
-
-            if (itemExistente != null)
-            {
-                // Si ya existe, solo actualizamos la cantidad
-                itemExistente.Cantidad += cantidad;
-            }
-            else
-            {
-                // Si es nuevo, creamos un nuevo CarritoItem y lo añadimos a la lista
-                var nuevoItem = new CarritoItem
-                {
-                    PizzaId = pizzaId,
-                    NombrePizza = pizza.Nombre,
-                    TamañoId = tamañoSeleccionadoId,
-                    NombreTamaño = tamaño.Nombre,
-                    Cantidad = cantidad,
-                    PrecioUnitario = tamaño.PrecioBase // Usamos el precio base del tamaño
-                };
-                carrito.Add(nuevoItem);
-            }
-
-            // 4. Guardar la lista actualizada de vuelta en la sesión
-            HttpContext.Session.SetString("Carrito", JsonConvert.SerializeObject(carrito));
-
-            // 5. Redirigir al usuario de vuelta al menú
-            return RedirectToAction("Index");
-        }
 
         // --- PASO 1 (Declaración del campo) ---
         // Aquí declaramos una variable _context a nivel de la clase.
@@ -101,10 +56,7 @@ namespace PizzeriaOnline.Controllers
         // Ahora que _context existe y tiene un valor, el método Index puede usarlo.
         public IActionResult Index()
         {
-            var listaDePizzas = _context.Pizzas
-                .Include(p => p.Variantes)
-                    .ThenInclude(v => v.Tamaño)
-                .ToList();
+            var listaDePizzas = _context.Pizzas.ToList();
 
             return View(listaDePizzas);
         }
@@ -120,17 +72,19 @@ namespace PizzeriaOnline.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-        public IActionResult Detalle(int id)
+        public IActionResult Constructor()
         {
-            var pizza = _context.Pizzas
-                .Include(p => p.Variantes)
-                    .ThenInclude(v => v.Tamaño)
-                .FirstOrDefault(p => p.Id == id);
-            if (pizza == null)
-            {
-                return NotFound();
-            }
-            return View(pizza);
+            // 1. Creamos una instancia de nuestro nuevo ViewModel.
+            var viewModel = new ConstructorViewModel();
+
+            // 2. Llenamos las listas del ViewModel con los datos de la base de datos.
+            //    Usamos OrderBy para que se muestren en un orden lógico.
+            viewModel.TamañosDisponibles = _context.Tamaños.ToList().OrderBy(t => t.PrecioBase).ToList();
+            viewModel.SaboresDisponibles = _context.Pizzas.OrderBy(p => p.Nombre).ToList();
+
+            // 3. Pasamos el ViewModel (que contiene ambas listas) a la Vista.
+            return View(viewModel);
         }
+
     }
 }

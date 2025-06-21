@@ -1,0 +1,170 @@
+﻿@model PizzeriaOnline.ViewModels.ConstructorViewModel
+@{
+    ViewData["Title"] = "Arma tu Pizza";
+}
+
+<h2>@ViewData["Title"]</h2>
+<p class="lead">Sigue los pasos para crear la pizza perfecta para ti.</p>
+
+<div class="row">
+    <div class="col-md-8">
+        @* El formulario enviará los datos a una acción que crearemos más tarde *@
+        <form id="constructor-form" asp-controller="Home" asp-action="AgregarAlCarrito" method="post">
+
+            @* --- PASO 1: SELECCIÓN DE TAMAÑO --- *@
+            <h4>Paso 1: Elige tu Tamaño</h4>
+            <div id="tamaño-options" class="list-group mb-4">
+                @foreach (var tamaño in Model.TamañosDisponibles)
+                {
+                    <label class="list-group-item list-group-item-action">
+                        <input class="form-check-input me-2" type="radio" name="tamañoId" value="@tamaño.Id"
+                               data-precio="@tamaño.PrecioBase"
+                               data-max-sabores="@tamaño.MaximoSabores" required>
+                        <strong>@tamaño.Nombre</strong> (@tamaño.Dimensiones) - @tamaño.NumeroRebanadas rebanadas.
+                        <span class="badge bg-secondary float-end">Hasta @tamaño.MaximoSabores sabor(es)</span>
+                    </label>
+                }
+            </div>
+
+            @* --- PASO 2: SELECCIÓN DE SABORES --- *@
+            <h4 id="sabores-header" class="d-none">Paso 2: Elige tu(s) Sabor(es) <span id="sabores-count" class="badge bg-info"></span></h4>
+            <div id="sabor-options" class="row d-none">
+                @foreach (var sabor in Model.SaboresDisponibles)
+                {
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <img src="@sabor.RutaImagen" class="card-img-top" alt="@sabor.Nombre" style="height: 150px; object-fit: cover;">
+                            <div class="card-body">
+                                <div class="form-check">
+                                    <input class="form-check-input sabor-checkbox" type="checkbox" name="saboresIds" value="@sabor.Id" id="sabor-@sabor.Id">
+                                    <label class="form-check-label" for="sabor-@sabor.Id">
+                                        <strong>@sabor.Nombre</strong>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+        </form>
+    </div>
+
+    @* --- BARRA LATERAL CON RESUMEN Y PRECIO --- *@
+    <div class="col-md-4">
+        <div class="card sticky-top" style="top: 20px;">
+            <div class="card-header">
+                <h4>Resumen de tu Pedido</h4>
+            </div>
+            <div class="card-body">
+                <h5>Tamaño: <span id="resumen-tamaño" class="text-muted">Ninguno</span></h5>
+                <hr />
+                <h5>Sabores Seleccionados:</h5>
+                <ul id="resumen-sabores" class="list-unstyled">
+                    <li class="text-muted">Ninguno</li>
+                </ul>
+                <hr />
+                <div class="text-end">
+                    <h3 class="fw-bold">Total: <span id="precio-final" class="text-success">$0.00</span></h3>
+                </div>
+            </div>
+            <div class="card-footer">
+                <button type="submit" form="constructor-form" id="btn-agregar-carrito" class="btn btn-primary btn-lg w-100" disabled>
+                    Añadir al Carrito
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@* --- SECCIÓN DE JAVASCRIPT PARA LA INTERACTIVIDAD --- *@
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Referencias a los elementos del DOM
+            const tamañoRadios = document.querySelectorAll('input[name="tamañoId"]');
+            const saborCheckboxes = document.querySelectorAll('.sabor-checkbox');
+            const saboresHeader = document.getElementById('sabores-header');
+            const saborOptions = document.getElementById('sabor-options');
+            const btnAgregar = document.getElementById('btn-agregar-carrito');
+
+            // Referencias al resumen
+            const resumenTamaño = document.getElementById('resumen-tamaño');
+            const resumenSaboresList = document.getElementById('resumen-sabores');
+            const precioFinalDisplay = document.getElementById('precio-final');
+            const saboresCountBadge = document.getElementById('sabores-count');
+
+            let maxSaboresPermitidos = 0;
+            let precioBase = 0;
+
+            // Función para actualizar todo el estado de la página
+            function actualizarEstado() {
+                const tamañoSeleccionado = document.querySelector('input[name="tamañoId"]:checked');
+                const saboresSeleccionados = document.querySelectorAll('.sabor-checkbox:checked');
+
+                // Actualizar resumen y precio si hay un tamaño seleccionado
+                if (tamañoSeleccionado) {
+                    // Obtenemos datos desde los atributos data-*
+                    precioBase = parseFloat(tamañoSeleccionado.dataset.precio);
+                    maxSaboresPermitidos = parseInt(tamañoSeleccionado.dataset.maxSabores);
+
+                    // Actualizar el resumen
+                    resumenTamaño.textContent = tamañoSeleccionado.labels[0].querySelector('strong').textContent;
+                    precioFinalDisplay.textContent = precioBase.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
+
+                    // Mostrar sección de sabores
+                    saboresHeader.classList.remove('d-none');
+                    saborOptions.classList.remove('d-none');
+                    saboresCountBadge.textContent = `${saboresSeleccionados.length} / ${maxSaboresPermitidos}`;
+                }
+
+                // Actualizar lista de sabores en el resumen
+                resumenSaboresList.innerHTML = '';
+                if (saboresSeleccionados.length > 0) {
+                    saboresSeleccionados.forEach(cb => {
+                        const li = document.createElement('li');
+                        li.textContent = `- ${cb.labels[0].querySelector('strong').textContent}`;
+                        resumenSaboresList.appendChild(li);
+                    });
+                } else {
+                    const li = document.createElement('li');
+                    li.className = 'text-muted';
+                    li.textContent = 'Ninguno';
+                    resumenSaboresList.appendChild(li);
+                }
+
+                // Habilitar/deshabilitar checkboxes de sabores
+                if (saboresSeleccionados.length >= maxSaboresPermitidos) {
+                    saborCheckboxes.forEach(cb => {
+                        if (!cb.checked) {
+                            cb.disabled = true;
+                        }
+                    });
+                } else {
+                    saborCheckboxes.forEach(cb => {
+                        cb.disabled = false;
+                    });
+                }
+
+                // Validar para activar el botón de agregar
+                if (tamañoSeleccionado && saboresSeleccionados.length > 0) {
+                    btnAgregar.disabled = false;
+                } else {
+                    btnAgregar.disabled = true;
+                }
+            }
+
+            // Añadir listeners a todos los inputs
+            tamañoRadios.forEach(radio => radio.addEventListener('change', () => {
+                 // Al cambiar tamaño, deseleccionamos todos los sabores para evitar confusiones
+                saborCheckboxes.forEach(cb => cb.checked = false);
+                actualizarEstado();
+            }));
+            saborCheckboxes.forEach(checkbox => checkbox.addEventListener('change', actualizarEstado));
+
+            // Llamada inicial por si acaso
+            actualizarEstado();
+        });
+    </script>
+}

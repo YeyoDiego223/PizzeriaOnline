@@ -10,8 +10,8 @@ using PizzeriaOnline.Data;
 namespace PizzeriaOnline.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250620225618_AddDbSetsForTamañoAndVariantes")]
-    partial class AddDbSetsForTamañoAndVariantes
+    [Migration("20250621020736_AddSeededData")]
+    partial class AddSeededData
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -29,15 +29,10 @@ namespace PizzeriaOnline.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("PizzaId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<decimal>("Precio")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("PizzaId");
 
                     b.ToTable("Ingredientes");
                 });
@@ -149,65 +144,53 @@ namespace PizzeriaOnline.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Tamaños");
-                });
 
-            modelBuilder.Entity("PizzeriaOnline.Models.VariantePizza", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("PizzaId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("TamañoId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PizzaId");
-
-                    b.HasIndex("TamañoId");
-
-                    b.ToTable("VariantePizzas");
-                });
-
-            modelBuilder.Entity("PizzeriaOnline.Models.Ingredientes", b =>
-                {
-                    b.HasOne("PizzeriaOnline.Models.Pizza", null)
-                        .WithMany("Ingredientes")
-                        .HasForeignKey("PizzaId");
-                });
-
-            modelBuilder.Entity("PizzeriaOnline.Models.VariantePizza", b =>
-                {
-                    b.HasOne("PizzeriaOnline.Models.Pizza", "Pizza")
-                        .WithMany("Variantes")
-                        .HasForeignKey("PizzaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PizzeriaOnline.Models.Tamaño", "Tamaño")
-                        .WithMany("Variantes")
-                        .HasForeignKey("TamañoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Pizza");
-
-                    b.Navigation("Tamaño");
-                });
-
-            modelBuilder.Entity("PizzeriaOnline.Models.Pizza", b =>
-                {
-                    b.Navigation("Ingredientes");
-
-                    b.Navigation("Variantes");
-                });
-
-            modelBuilder.Entity("PizzeriaOnline.Models.Tamaño", b =>
-                {
-                    b.Navigation("Variantes");
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Dimensiones = "35cm",
+                            MaximoSabores = 1,
+                            Nombre = "Mediana",
+                            NumeroRebanadas = 6,
+                            PrecioBase = 150.00m
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Dimensiones = "40cm",
+                            MaximoSabores = 2,
+                            Nombre = "Grande",
+                            NumeroRebanadas = 8,
+                            PrecioBase = 200.00m
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Dimensiones = "45cm",
+                            MaximoSabores = 2,
+                            Nombre = "Mediana",
+                            NumeroRebanadas = 12,
+                            PrecioBase = 250.00m
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Dimensiones = "50cm",
+                            MaximoSabores = 4,
+                            Nombre = "Cuadrada",
+                            NumeroRebanadas = 16,
+                            PrecioBase = 350.00m
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Dimensiones = "65cm",
+                            MaximoSabores = 4,
+                            Nombre = "Rectangular",
+                            NumeroRebanadas = 24,
+                            PrecioBase = 500.00m
+                        });
                 });
 #pragma warning restore 612, 618
         }

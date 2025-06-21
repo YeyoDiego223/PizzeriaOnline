@@ -7,11 +7,25 @@
 namespace PizzeriaOnline.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialSchema : Migration
+    public partial class AddSeededData : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Ingredientes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Nombre = table.Column<string>(type: "TEXT", nullable: false),
+                    Precio = table.Column<decimal>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Ingredientes", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Pizzas",
                 columns: table => new
@@ -28,7 +42,7 @@ namespace PizzeriaOnline.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Tamaño",
+                name: "Tamaños",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
@@ -36,58 +50,12 @@ namespace PizzeriaOnline.Migrations
                     Nombre = table.Column<string>(type: "TEXT", nullable: false),
                     Dimensiones = table.Column<string>(type: "TEXT", nullable: false),
                     NumeroRebanadas = table.Column<int>(type: "INTEGER", nullable: false),
-                    MaximoSabores = table.Column<int>(type: "INTEGER", nullable: false),
-                    PrecioBase = table.Column<decimal>(type: "TEXT", nullable: false)
+                    PrecioBase = table.Column<decimal>(type: "TEXT", nullable: false),
+                    MaximoSabores = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Tamaño", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Ingredientes",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Nombre = table.Column<string>(type: "TEXT", nullable: false),
-                    Precio = table.Column<decimal>(type: "TEXT", nullable: false),
-                    PizzaId = table.Column<int>(type: "INTEGER", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Ingredientes", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Ingredientes_Pizzas_PizzaId",
-                        column: x => x.PizzaId,
-                        principalTable: "Pizzas",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "VariantePizza",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    PizzaId = table.Column<int>(type: "INTEGER", nullable: false),
-                    TamañoId = table.Column<int>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_VariantePizza", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_VariantePizza_Pizzas_PizzaId",
-                        column: x => x.PizzaId,
-                        principalTable: "Pizzas",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_VariantePizza_Tamaño_TamañoId",
-                        column: x => x.TamañoId,
-                        principalTable: "Tamaño",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                    table.PrimaryKey("PK_Tamaños", x => x.Id);
                 });
 
             migrationBuilder.InsertData(
@@ -105,20 +73,17 @@ namespace PizzeriaOnline.Migrations
                     { 8, "Masa maestra, salsa secreta, carne al pastor, mozzarella", "San Fermin", "/images/pizzas/san_fermin.jpg" }
                 });
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Ingredientes_PizzaId",
-                table: "Ingredientes",
-                column: "PizzaId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_VariantePizza_PizzaId",
-                table: "VariantePizza",
-                column: "PizzaId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_VariantePizza_TamañoId",
-                table: "VariantePizza",
-                column: "TamañoId");
+            migrationBuilder.InsertData(
+                table: "Tamaños",
+                columns: new[] { "Id", "Dimensiones", "MaximoSabores", "Nombre", "NumeroRebanadas", "PrecioBase" },
+                values: new object[,]
+                {
+                    { 1, "35cm", 1, "Mediana", 6, 150.00m },
+                    { 2, "40cm", 2, "Grande", 8, 200.00m },
+                    { 3, "45cm", 2, "Mediana", 12, 250.00m },
+                    { 4, "50cm", 4, "Cuadrada", 16, 350.00m },
+                    { 5, "65cm", 4, "Rectangular", 24, 500.00m }
+                });
         }
 
         /// <inheritdoc />
@@ -128,13 +93,10 @@ namespace PizzeriaOnline.Migrations
                 name: "Ingredientes");
 
             migrationBuilder.DropTable(
-                name: "VariantePizza");
-
-            migrationBuilder.DropTable(
                 name: "Pizzas");
 
             migrationBuilder.DropTable(
-                name: "Tamaño");
+                name: "Tamaños");
         }
     }
 }

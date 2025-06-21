@@ -18,31 +18,11 @@
                         <h5 class="card-title">@pizza.Nombre</h5>
                         <p class="card-text">@pizza.Descripcion</p>
 
-                        <h6 class="mt-auto">Tamaños y Precios:</h6>
-                        <ul class="list-group list-group-flush">
-                            @* Verificamos si hay variantes disponibles para esta pizza *@
-                            @if (pizza.Variantes != null && pizza.Variantes.Any())
-                            {
-                                @* Recorremos cada variante (tamaño/precio) y la mostramos *@
-                                @foreach (var variante in pizza.Variantes.OrderBy(v => v.Tamaño.PrecioBase))
-                                {
-                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        <span>
-                                            <strong>@variante.Tamaño.Nombre</strong> (@variante.Tamaño.Dimensiones)
-                                        </span>
-                                        <span class="badge bg-success rounded-pill" style="font-size: 1rem;">
-                                            @variante.Tamaño.PrecioBase.ToString("C")
-                                        </span>
-                                    </li>
-                                }
-                            }
-                            else
-                            {
-                                <li class="list-group-item">No hay tamaños disponibles.</li>
-                            }
-                        </ul>
-
-                        <a asp-controller="Home" asp-action="Detalle" asp-route-id="@pizza.Id" class="btn btn-success mt-3">Personalizar y Pedir</a>
+                        <div class="mt-auto">
+                            <a asp-controller="Home" asp-action="Constructor" class="btn btn-success">
+                                ¡Arma tu Pizza!
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
