@@ -36,6 +36,62 @@ namespace PizzeriaOnline.Controllers
             return View(carrito);
         }
 
+        [HttpPost]
+        public IActionResult AgregarAlCarrito(int tamañoId, List<int> saboresIds)
+        {
+            if (saboresIds == null || !saboresIds.Any())
+            {
+                return RedirectToAction("Constructor");
+            }
+            var tamañoSeleccionado = _context.Tamaños.Find(tamañoId);
+            var saboresSeleccionado = _context.Pizzas.Where(p => saboresIds.Contains(p.Id)).ToList();
+            if (tamañoSeleccionado == null || !saboresIds.Any())
+            {
+                return NotFound();
+            }
+
+            var nuevoItem = new CarritoItem
+            {
+                TamañoId = tamañoId,
+                NombreTamaño = tamañoSeleccionado.Nombre,
+                PrecioFinal = tamañoSeleccionado.PrecioBase,
+                NombresSabores = saboresSeleccionado.Select(p => p.Nombre).ToList(),
+                Cantidad = 1
+            };
+
+            var carritoJson = HttpContext.Session.GetString("Carrito");
+            List<CarritoItem> carrito;
+
+            if (carritoJson == null)
+            {
+                carrito = new List<CarritoItem>();
+            }
+            else
+            {
+                carrito = JsonConvert.DeserializeObject<List<CarritoItem>>(carritoJson);
+            }
+            carrito.Add(nuevoItem);
+            HttpContext.Session.SetString("Carrito", JsonConvert.SerializeObject(carrito));
+            return RedirectToAction("Carrito");
+        }
+
+        [HttpPost]
+        public IActionResult QuitarDelCarrito(Guid id)
+        {
+            var carritoJson = HttpContext.Session.GetString("Carrito");
+
+            if (carritoJson != null)
+            {
+                var carrito = JsonConvert.DeserializeObject<List<CarritoItem>>(carritoJson);
+                var itemParaQuitar = carrito.FirstOrDefault(i => i.Id == id);
+                if (itemParaQuitar != null)
+                {
+                    carrito.Remove(itemParaQuitar);
+                    HttpContext.Session.SetString("Carrito", JsonConvert.SerializeObject(carrito));
+                }
+            }            
+            return RedirectToAction("Carrito");
+        }
 
         // --- PASO 1 (Declaración del campo) ---
         // Aquí declaramos una variable _context a nivel de la clase.

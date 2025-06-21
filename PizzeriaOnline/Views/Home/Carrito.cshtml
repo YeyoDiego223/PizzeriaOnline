@@ -13,44 +13,69 @@
 }
 else
 {
-    <table class="table table-hover align-middle">
-        <thead class="table-dark">
-            <tr>
-                <th>Producto</th>
-                <th>Tamaño</th>
-                <th class="text-end">Precio</th>
-                <th class="text-center">Cantidad</th>
-                <th class="text-end">Subtotal</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
+    @* Reemplaza tu tabla y los botones de abajo con este código en Carrito.cshtml *@
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info" role="alert">
+            Tu carrito está vacío. ¡<a asp-action="Index" asp-controller="Home" class="alert-link">Vuelve al menú</a> para añadir algunas pizzas!
+        </div>
+    }
+    else
+    {
+        <table class="table table-hover align-middle">
+            <thead class="table-dark">
                 <tr>
-                    <td>@item.NombrePizza</td>
-                    <td>@item.NombreTamaño</td>
-                    <td class="text-end">@item.PrecioUnitario.ToString("C")</td>
-                    <td class="text-center">@item.Cantidad</td>
-                    <td class="text-end">@item.Subtotal.ToString("C")</td>
-                    <td class="text-center">
-                        <a href="#" class="btn btn-danger btn-sm">Quitar</a>
-                    </td>
+                    <th>Producto Personalizado</th>
+                    <th class="text-end">Precio</th>
+                    <th class="text-center">Cantidad</th>
+                    <th></th>
                 </tr>
-            }
-        </tbody>
-        <tfoot>
-            <tr>
-                <td colspan="4" class="text-end fs-4"><strong>Total:</strong></td>
-                <td class="text-end fs-4">
-                    <strong>
-                        @Model.Sum(item => item.Subtotal).ToString("C")
-                    </strong>
-                </td>
-                <td></td>
-            </tr>
-        </tfoot>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <h5 class="mb-1">Pizza @item.NombreTamaño</h5>
+                            <ul class="list-uBnstyled mb-0 ps-3">
+                                @foreach (var sabor in item.NombresSabores)
+                                {
+                                    <li><small>- @sabor</small></li>
+                                }
+                            </ul>
+                        </td>
+                        <td class="text-end">@item.PrecioFinal.ToString("C")</td>
+                        <td class="text-center">@item.Cantidad</td>
+                        <td class="text-center">
+                            <form asp-controller="Home" asp-action="QuitarDelCarrito" method="post">
+                                <input type="hidden" name="id" value="@item.Id"/>
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    <i class="bi bi-trash"></i> Quitar
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="2" class="text-end fs-4"><strong>Total:</strong></td>
+                    <td class="text-end fs-4">
+                        <strong>
+                            @Model.Sum(item => item.PrecioFinal * item.Cantidad).ToString("C")
+                        </strong>
+                    </td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div class="text-end mt-4">
+            <a asp-controller="Home" asp-action="Constructor" class="btn btn-secondary">Añadir otra Pizza</a>
+            <a href="#" class="btn btn-success btn-lg">Proceder al Pago</a>
+        </div>
+    }
 
     <div class="text-end mt-4">
         <a asp-action="Index" asp-controller="Home" class="btn btn-secondary">Seguir Comprando</a>
