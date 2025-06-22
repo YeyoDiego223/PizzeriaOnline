@@ -1,9 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PizzeriaOnline.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using System.Collections.Generic;
 namespace PizzeriaOnline.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext
     {
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
