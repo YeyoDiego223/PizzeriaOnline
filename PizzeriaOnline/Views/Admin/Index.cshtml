@@ -1,0 +1,45 @@
+﻿@model List<PizzeriaOnline.Models.Pedido>
+@{
+	ViewData["Title"] = "Panel de Administración";
+}
+
+<hi class="display-4">Pedidos Recibidos</hi>
+<p class="lead">Lista de todos los pedidos realizados por los clientes.</p>
+<hr />
+
+@if (!Model.Any())
+{
+	<div class="alert alert-info">
+		Aún no se han recibido pedidos
+	</div>
+}
+else
+{
+	<table class="table table-bordered table-striped">
+		<thead class="table-dark">
+			<tr>
+				<th>ID Pedido</th>
+				<th>Fecha</th>
+				<th>Clientes</th>
+				<th>Total</th>
+				<th>Estado</th>
+				<th>Acciones</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var pedido in Model)
+			{
+				<tr>
+					<td>@pedido.Id</td>
+					<td>@pedido.FechaPedido.ToString("g")</td>
+					<td>@pedido.NombreCliente</td>
+					<td>@pedido.TotalPedido.ToString("C")</td>
+					<td><span class="badge bg-primary">@pedido.Estado</span></td>
+					<td>
+						<a href="#" class="btn btn-info btn-sm">Ver Detalles</a>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}

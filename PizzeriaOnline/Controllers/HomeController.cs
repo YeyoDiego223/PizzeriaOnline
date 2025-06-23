@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using PizzeriaOnline.ViewModels;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PizzeriaOnline.Controllers
 {
@@ -19,6 +20,12 @@ namespace PizzeriaOnline.Controllers
         public HomeController(ApplicationDbContext context)
         {
             _context = context;
+        }
+
+        [Authorize]
+        public IActionResult Privacy()
+        {
+            return View();
         }
 
         public IActionResult Index()
@@ -50,6 +57,54 @@ namespace PizzeriaOnline.Controllers
                 carrito = JsonConvert.DeserializeObject<List<CarritoItem>>(carritoJson);
             }
             return View(carrito);
+        }
+
+        [HttpPost]
+        public IActionResult FinalizarPedido()
+        {
+            var carritoJson = HttpContext.Session.GetString("Carrito");
+            if (string.IsNullOrEmpty(carritoJson))
+            {
+                return RedirectToAction("Index");
+            }
+
+            var carrito = JsonConvert.DeserializeObject<List<CarritoItem>>(carritoJson);
+
+            if (carrito == null || !carrito.Any())
+            {
+                return RedirectToAction("Index");
+            }
+
+            var nuevoPedido = new Pedido
+            {
+                FechaPedido = DateTime.Now,
+                TotalPedido = carrito.Sum(c => c.PrecioFinal * c.Cantidad),
+                Estado = "Recibido",
+                NombreCliente = "Cliente de Prueba",
+                DireccionEntrega = "N/A",
+                Telefono = "N/A"
+            };
+
+            foreach (var item in carrito)
+            {
+                // Por cada item en el carrito, creamos un detalle de pedido.
+                var saboresTexto = string.Join(" / ", item.NombresSabores);
+                var descripcionCompleta = $"{item.NombreTamaño} ({saboresTexto})";
+
+                var nuevoDetalle = new DetallePedido
+                {
+                    Cantidad = item.Cantidad,
+                    PrecioUnitario = item.PrecioFinal,                    
+                    DescripcionProducto =  descripcionCompleta
+                };
+
+                nuevoPedido.Detalles.Add(nuevoDetalle);
+                
+            }
+            _context.Pedidos.Add(nuevoPedido);
+            _context.SaveChanges();
+            HttpContext.Session.Remove("Carrito");
+            return RedirectToAction("Index");
         }
 
         [HttpPost]

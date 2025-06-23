@@ -70,15 +70,8 @@ else
                 </tr>
             </tfoot>
         </table>
-
-        <div class="text-end mt-4">
-            <a asp-controller="Home" asp-action="Constructor" class="btn btn-secondary">Añadir otra Pizza</a>
-            <a href="#" class="btn btn-success btn-lg">Proceder al Pago</a>
-        </div>
-    }
-
-    <div class="text-end mt-4">
-        <a asp-action="Index" asp-controller="Home" class="btn btn-secondary">Seguir Comprando</a>
-        <a href="#" class="btn btn-success btn-lg">Proceder al Pago</a>
-    </div>
+        <form asp-controller="Home" asp-action="FinalizarPedido" method="post">
+            <button type="submit" class="btn btn-success btn-lg">Procer al pago</button>
+        </form>
+    }    
 }
