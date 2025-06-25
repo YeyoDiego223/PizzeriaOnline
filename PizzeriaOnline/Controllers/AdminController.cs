@@ -20,6 +20,20 @@ namespace PizzeriaOnline.Controllers
             _context = context;
         }
 
+        [HttpPost]
+        public IActionResult ActualizarEstado(int id, string nuevoEstado)
+        {
+            var pedido = _context.Pedidos.Find(id);
+
+            if (pedido != null && !string.IsNullOrEmpty(nuevoEstado))
+            {
+                pedido.Estado = nuevoEstado;
+                _context.SaveChanges();
+            }
+
+            return RedirectToAction("DetallePedido", new { id = id });
+        }
+
         public IActionResult DetallePedido(int id)
         {
             var pedidoConDetalles = _context.Pedidos
