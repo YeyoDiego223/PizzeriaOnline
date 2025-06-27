@@ -1,0 +1,41 @@
+﻿@model IEnumerable<PizzeriaOnline.Models.Pizza>
+@{
+	ViewData["Title"] = "Administración de Pizzas";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>
+	<a asp-action="Create" class="btn btn-primary">Crear Nueva Pizzas</a>
+</p>
+
+<table class="table table-striped">
+	<thead>
+		<tr>
+			<th>Imagen</th>
+			<th>Nombre</th>
+			<th>Descripción</th>
+			<th>Acciones</th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var pizza in Model)
+		{
+			<tr>
+				<td>
+					<img src="@pizza.RutaImagen" alt="Imagen de @pizza.Nombre" style="width: 100px; height: auto; border-radius: 5px;"/>
+				</td>
+				<td>
+					@Html.DisplayFor(modelItem => pizza.Nombre)
+				</td>
+				<td>
+					@Html.DisplayFor(modelItem => pizza.Descripcion)
+				</td>
+				<td>
+					<a asp-action="Edit" asp-route-id="@pizza.Id" class="btn btn-warning btn-sm">Editar</a>
+					<a asp-action="Delete" asp-route-id="@pizza.Id" class="btn btn-danger btn-sm">Eliminar</a>
+				</td>
+			</tr>
+		}
+	</tbody>
+</table>

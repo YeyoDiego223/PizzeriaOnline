@@ -15,7 +15,30 @@
         <ul class="list-group">
             <li class="list-group-item"><strong>ID Pedido:</strong> @Model.Id</li>
             <li class="list-group-item"><strong>Fecha:</strong> @Model.FechaPedido.ToString("F")</li>
-            <li class="list-group-item"><strong>Estado:</strong> <span class="badge bg-primary">@Model.Estado</span></li>
+            <li class="list-group-item"><strong>Estado:</strong> 
+                @{
+                    var colorBadge = "bg-secondary"; // Un color por defecto si no coincide ninguno
+                    switch (Model.Estado)                                                                                   
+                    {
+                        case "Recibido":
+                            colorBadge = "bg-primary";
+                            break;
+                        case "En preparacion":
+                            colorBadge = "bg-warning text-dark";
+                            break;
+                        case "En camino":
+                            colorBadge = "bg-info text-dark";
+                            break;
+                        case "Completado":
+                            colorBadge = "bg-success";
+                            break;
+                        case "Cancelado":
+                            colorBadge = "bg-danger";
+                            break;
+                    }
+                }
+                <span class="badge @colorBadge fs-6">@Model.Estado</span>
+            </li>
             <li class="list-group-item"><strong>Total:</strong> <span class="fw-bold text-success">@Model.TotalPedido.ToString("C")</span></li>
         </ul>
     </div>

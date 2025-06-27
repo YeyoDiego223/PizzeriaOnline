@@ -7,6 +7,11 @@
 <p class="lead">Lista de todos los pedidos realizados por los clientes.</p>
 <hr />
 
+<div class="mt-4">
+	<a asp-controller="PizzasAdmin" asp-action="Index" class="btn btn-secondary">
+		Gestionar Pizzas del Menú
+	</a>
+</div>
 @if (!Model.Any())
 {
 	<div class="alert alert-info">
@@ -28,13 +33,32 @@ else
 		</thead>
 		<tbody>
 			@foreach (var pedido in Model)
-			{
+			{				
+					var colorBadge = "bg-secondary";
+					switch (pedido.Estado)
+					{
+						case "Recibido":
+							colorBadge = "bg-primary";
+							break;
+						case "En preparación":
+							colorBadge = "bg-warning text-dark";
+							break;
+						case "En camino":
+							colorBadge = "bg-info text-dark";
+							break;
+						case "Completado":
+							colorBadge = "bg-success";
+							break;
+						case "Cancelado":
+							colorBadge = "bg-danger";
+							break;
+					}				
 				<tr>
 					<td>@pedido.Id</td>
 					<td>@pedido.FechaPedido.ToString("g")</td>
 					<td>@pedido.NombreCliente</td>
 					<td>@pedido.TotalPedido.ToString("C")</td>
-					<td><span class="badge bg-primary">@pedido.Estado</span></td>
+					<td><span class="badge @colorBadge fs-6">@pedido.Estado</span></td>
 					<td>
 						<a asp-action="DetallePedido" asp-route-id="@pedido.Id" class="btn btn-info btn-sm">Ver Detalles</a>
 					</td>
