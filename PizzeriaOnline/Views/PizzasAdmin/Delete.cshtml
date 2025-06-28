@@ -1,0 +1,39 @@
+﻿@model PizzeriaOnline.Models.Pizza
+
+@{
+	ViewData["Title"] = "Eliminar pizza";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h3>¿Estás seguro de que quieres eliminar esta pizza?</h3>
+<div class="alert alert-danger">
+	<strong>!Esta acción no se puede deshacer!</strong>
+</div>
+
+<div>
+	<h4>Pizza</h4>
+	<hr />
+	<dl class="row">
+		<dt class="col-sm-3">
+			@Html.DisplayNameFor(model => model.Nombre)
+		</dt>
+		<dd class="col-sm-9">
+			@Html.DisplayFor(model => model.Nombre)
+		</dd>
+		<dt class="col-sm-3">
+			@Html.DisplayNameFor(model => model.Descripcion)
+		</dt>
+		<dd class="col-sm-9">
+			@Html.DisplayFor(model => model.Descripcion)
+		</dd>
+	</dl>
+
+	<form asp-action="Delete" method="post">
+		@* Este campo oculto es crucial para que el servidor sepa que ID borrar *@
+		<input type="hiddenn" asp-for="Id" />
+
+		<input type="submit" value="Sí, Eliminar" class="btn btn-danger" />
+		<a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+	</form>
+</div>

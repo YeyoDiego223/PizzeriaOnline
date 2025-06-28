@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using PizzeriaOnline.Data;
 using PizzeriaOnline.Models;
+using Microsoft.Extensions.FileProviders;
 
 namespace PizzeriaOnline.Controllers
 {
@@ -15,6 +16,49 @@ namespace PizzeriaOnline.Controllers
             _context = context;
         }
 
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteConfirmed(int id)
+        {
+            var pizza = _context.Pizzas.Find(id);
+            if(pizza != null)
+            {
+                _context.Pizzas.Remove(pizza);
+                _context.SaveChanges();
+            }
+            return RedirectToAction(nameof(Index));
+        }
+        public IActionResult Delete(int id)
+        {
+            var pizza = _context.Pizzas.Find(id);
+            if (pizza == null)
+            {
+                return NotFound();
+            }
+            return View(pizza);
+        }
+        public IActionResult Edit(int id)
+        {
+            var pizza = _context.Pizzas.Find(id);
+
+            if (pizza == null)
+            {
+                return NotFound();
+            }
+            return View(pizza);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(Pizza pizza)
+        {
+            if(ModelState.IsValid)
+            {
+                _context.Update(pizza);
+                _context.SaveChanges();
+            }
+            return RedirectToAction("Index");
+        }
         public IActionResult Create()
         {
             return View();
@@ -30,7 +74,7 @@ namespace PizzeriaOnline.Controllers
                 _context.Add(pizza);
                 _context.SaveChanges();
             }          
-            return View(pizza);
+            return RedirectToAction("Index");
         }
 
         public IActionResult Index()
