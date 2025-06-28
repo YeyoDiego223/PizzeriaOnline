@@ -10,9 +10,27 @@ namespace PizzeriaOnline.Controllers
     public class PizzasAdminController : Controller
     {
         private readonly ApplicationDbContext _context;
-        public PizzasAdminController(ApplicationDbContext context) 
+        public PizzasAdminController(ApplicationDbContext context)
         {
             _context = context;
+        }
+
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Create(Pizza pizza)
+        {
+
+            if (ModelState.IsValid)
+            {
+                _context.Add(pizza);
+                _context.SaveChanges();
+            }          
+            return View(pizza);
         }
 
         public IActionResult Index()
