@@ -22,6 +22,27 @@ namespace PizzeriaOnline.Controllers
             _context = context;
         }
 
+        public IActionResult Checkout()
+        {
+            var carritoJson = HttpContext.Session.GetString("Carrito");
+            if (string.IsNullOrEmpty(carritoJson))
+            {
+                // Si no hay carrito, no se puede hacer checkout. Lo mandamos al carrito vacío.
+                return RedirectToAction("Carrito");
+            }
+
+            var carrito = JsonConvert.DeserializeObject<List<CarritoItem>>(carritoJson);
+
+            // Creamos el ViewModel y lo llenamos con los datos del carrito
+            var viewModel = new CheckoutViewModel
+            {
+                Carrito = carrito,
+                TotalCarrito = carrito.Sum(item => item.PrecioFinal * item.Cantidad)
+            };
+
+            return View(viewModel);
+        }
+
         [Authorize]
         public IActionResult Privacy()
         {
@@ -60,51 +81,58 @@ namespace PizzeriaOnline.Controllers
         }
 
         [HttpPost]
-        public IActionResult FinalizarPedido()
+        public IActionResult FinalizarPedido(CheckoutViewModel checkoutModel)
         {
-            var carritoJson = HttpContext.Session.GetString("Carrito");
-            if (string.IsNullOrEmpty(carritoJson))
+            if (ModelState.IsValid)
             {
-                return RedirectToAction("Index");
-            }
-
-            var carrito = JsonConvert.DeserializeObject<List<CarritoItem>>(carritoJson);
-
-            if (carrito == null || !carrito.Any())
-            {
-                return RedirectToAction("Index");
-            }
-
-            var nuevoPedido = new Pedido
-            {
-                FechaPedido = DateTime.Now,
-                TotalPedido = carrito.Sum(c => c.PrecioFinal * c.Cantidad),
-                Estado = "Recibido",
-                NombreCliente = "Cliente de Prueba",
-                DireccionEntrega = "N/A",
-                Telefono = "N/A"
-            };
-
-            foreach (var item in carrito)
-            {
-                // Por cada item en el carrito, creamos un detalle de pedido.
-                var saboresTexto = string.Join(" / ", item.NombresSabores);
-                var descripcionCompleta = $"{item.NombreTamaño} ({saboresTexto})";
-
-                var nuevoDetalle = new DetallePedido
+                var carritoJson = HttpContext.Session.GetString("Carrito");   
+                if (string.IsNullOrEmpty(carritoJson))
                 {
-                    Cantidad = item.Cantidad,
-                    PrecioUnitario = item.PrecioFinal,                    
-                    DescripcionProducto =  descripcionCompleta
+                    return RedirectToAction("Index");
+                }
+                var carrito = JsonConvert.DeserializeObject<List<CarritoItem>>(carritoJson);
+                if (carrito == null || !carrito.Any())
+                {
+                    return RedirectToAction("Index");
+                }
+
+                var nuevoPedido = new Pedido
+                {
+                    FechaPedido = DateTime.Now,
+                    NombreCliente = checkoutModel.NombreCliente,
+                    DireccionEntrega = checkoutModel.DireccionEntrega,
+                    Telefono = checkoutModel.Telefono,
+                    TotalPedido = carrito.Sum(c => c.PrecioFinal * c.Cantidad),
+                    Estado = "Recibido"
                 };
 
-                nuevoPedido.Detalles.Add(nuevoDetalle);
-                
+                foreach (var item in carrito)
+                {
+                    var saboresTexto = string.Join(" / ", item.NombresSabores);
+                    var descripcionCompleta = $"{item.NombreTamaño} ({saboresTexto})";
+
+                    var nuevoDetalle = new DetallePedido
+                    {
+                        Cantidad = item.Cantidad,
+                        PrecioUnitario = item.PrecioFinal,
+                        DescripcionProducto = descripcionCompleta
+                    };
+                    nuevoPedido.Detalles.Add(nuevoDetalle);
+                }
+                _context.Pedidos.Add(nuevoPedido);
+                _context.SaveChanges();
+                HttpContext.Session.Remove("Carrito");
+
+                return View("Checkout", checkoutModel);
             }
-            _context.Pedidos.Add(nuevoPedido);
-            _context.SaveChanges();
-            HttpContext.Session.Remove("Carrito");
-            return RedirectToAction("Index");
+
+            var carritoJsonInvalido = HttpContext.Session.GetString("Carrito");
+            if(!string.IsNullOrEmpty(carritoJsonInvalido))
+            {
+                checkoutModel.Carrito = JsonConvert.DeserializeObject<List<CarritoItem>>(carritoJsonInvalido);
+                checkoutModel.TotalCarrito = checkoutModel.Carrito.Sum(i => i.PrecioFinal * i.Cantidad);
+            }
+            return View("Checkout", checkoutModel);
         }
 
         [HttpPost]

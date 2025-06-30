@@ -1,0 +1,63 @@
+﻿@model PizzeriaOnline.ViewModels.CheckoutViewModel
+@{
+	ViewData["Title"] = "Finalizar Pedido";
+}
+
+<h1>@ViewData["Title"]</h1>
+<p>Por favor, confirma tu pedido y proporciona tus datos para la entrega</p>
+
+<div class="row">
+	<div class="col-md-7">
+		<h4>Resumen de tu Carrito</h4>
+		<table class="table">
+			@foreach (var item in Model.Carrito)
+			{
+				<tr>
+					<td>
+						<strong>@item.NombreTamaño</strong>
+						<ul class="list-unstyled mb-0 ps-3">
+							@foreach(var sabor in item.NombresSabores)
+							{
+								<li><small>- @sabor</small></li>
+							}
+						</ul>
+					</td>
+					<td class="text-end">@item.PrecioFinal.ToString("C")</td>
+				</tr>
+			}
+		</table>
+		<h4 class="text-end">Total: <span class="text-success">@Model.TotalCarrito.ToString("C")</span></h4>
+		<hr />
+	</div>
+	<div class="col-md-5">
+		<h4>Tus Datos</h4>
+		<form asp-action="FinalizarPedido" method="post">
+			<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+			<div class="mb-3">
+				<label asp-for="NombreCliente" class="form-label">Nombre Completo</label>
+				<input asp-for="NombreCliente" class="form-control"/>
+				<span asp-validation-for="NombreCliente" class="text-danger"></span>
+			</div>
+			<div class="mb-3">
+				<label asp-for="DireccionEntrega" class="form-label">Dirección de Entrega</label>
+				<input asp-for="DireccionEntrega" class="form-control"/>
+				<span asp-validation-for="DireccionEntrega" class="text-danger"></span>
+			</div>
+			<div class="mb-3">
+				<label asp-for="Telefono" class="form-label">Teléfono</label>
+				<input asp-for="Telefono" class="form-control"/>
+				<span asp-validation-for="Telefono" class="text-danger"></span>
+			</div>
+
+			<div class="d-grid gap-2 mt-4">
+				<button type="submit" class="btn btn-primary btn-lg">Confirmar y Realizar Pedido</button>
+				<a asp-action="Carrito" class="btn btn-outline-secondary">Volver al Carrito</a>
+			</div>
+		</form>"
+	</div>
+</div>
+
+@section Scripts {
+	@{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
