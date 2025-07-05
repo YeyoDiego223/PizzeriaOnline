@@ -4,6 +4,14 @@
 }
 
 <hi class="display-4">Pedidos Recibidos</hi>
+<form asp-action="Index" asp-controller="Admin" method="get" class="mb-3">
+	<div class="input-group">
+		<input type="text" name="terminoBusqueda" value="@ViewData["BusquedaActual"]" class="form-control" placeholder="Buscar por Nombre o ID Pedido..." />
+		<button type="submit" class="btn btn-primary">
+			<i class="bi bi-search"></i> Buscar
+		</button>
+	</div>
+</form>
 <p class="lead">Lista de todos los pedidos realizados por los clientes.</p>
 <hr />
 

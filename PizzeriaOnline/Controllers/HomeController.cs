@@ -85,6 +85,7 @@ namespace PizzeriaOnline.Controllers
         {
             if (ModelState.IsValid)
             {
+                // 1. Cargar el carrito de la sesión
                 var carritoJson = HttpContext.Session.GetString("Carrito");   
                 if (string.IsNullOrEmpty(carritoJson))
                 {
@@ -96,6 +97,7 @@ namespace PizzeriaOnline.Controllers
                     return RedirectToAction("Index");
                 }
 
+                // 2. Crear el objeto Pedido principal
                 var nuevoPedido = new Pedido
                 {
                     FechaPedido = DateTime.Now,
@@ -106,6 +108,7 @@ namespace PizzeriaOnline.Controllers
                     Estado = "Recibido"
                 };
 
+                // 3. Crear y añadir los Detalles del Pedido
                 foreach (var item in carrito)
                 {
                     var saboresTexto = string.Join(" / ", item.NombresSabores);
@@ -119,13 +122,20 @@ namespace PizzeriaOnline.Controllers
                     };
                     nuevoPedido.Detalles.Add(nuevoDetalle);
                 }
+
+                // 4. Guardar todo en la Base de Datos
                 _context.Pedidos.Add(nuevoPedido);
                 _context.SaveChanges();
+
+                // 5. Limpiar el carrito de las sesión
                 HttpContext.Session.Remove("Carrito");
 
+                //6. Redirigir al usuario (a una futura página de "Gracias")
                 return View("Checkout", checkoutModel);
             }
 
+            // Si el modelo no es valido, volvemos a mostrar el formulario
+            // Ojo: necesitamos recargar el carrito para mostrar el resumen en la vista de chekout
             var carritoJsonInvalido = HttpContext.Session.GetString("Carrito");
             if(!string.IsNullOrEmpty(carritoJsonInvalido))
             {
