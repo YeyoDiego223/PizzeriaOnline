@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using PizzeriaOnline.Data;
 using PizzeriaOnline.Models;
@@ -20,6 +21,29 @@ namespace PizzeriaOnline.Controllers
         {
             var listaDeIngredientes = _context.Ingredientes.ToList();
             return View(listaDeIngredientes);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteConfirmed(int id)
+        {
+            var ingrediente = _context.Ingredientes.Find(id);
+            if (ingrediente != null)
+            {
+                _context.Ingredientes.Remove(ingrediente);
+                _context.SaveChanges();
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
+        public IActionResult Delete(int id)
+        {
+            var ingrediente = _context.Ingredientes.Find(id);
+            if (ingrediente == null)
+            {
+                return NotFound();
+            }
+            return View(ingrediente);
         }
 
         public IActionResult Edit(int Id)
