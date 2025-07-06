@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using PizzeriaOnline.Data;
 using PizzeriaOnline.Models;
 
@@ -20,6 +21,31 @@ namespace PizzeriaOnline.Controllers
             var listaDeIngredientes = _context.Ingredientes.ToList();
             return View(listaDeIngredientes);
         }
+
+        public IActionResult Edit(int Id)
+        {
+            var ingrediente = _context.Ingredientes.Find(Id);
+
+            if (ingrediente == null)
+            {
+                return NotFound();
+            }
+
+            return View(ingrediente);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(Ingrediente ingrediente)
+        {
+            if(ModelState.IsValid)
+            {
+                _context.Update(ingrediente);
+                _context.SaveChanges();
+            }
+            return RedirectToAction("Index");
+        }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]

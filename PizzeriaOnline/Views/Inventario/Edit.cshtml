@@ -1,0 +1,42 @@
+﻿@model PizzeriaOnline.Models.Ingrediente
+
+@{
+	ViewData["Title"] = "Editar Nuevo Ingrediente";
+}
+
+<h1>@ViewData["Title"]</h1>
+<h4>Ingrediente</h4>
+<hr />
+<div class="row">
+	<div class="col-md-6">
+		<form asp-action="Edit" method="post">
+			<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+			<input type="hidden" asp-for="Id"/>
+
+			<div class="mb-3">
+				<label asp-for="Nombre"></label>
+				<input asp-for="Nombre" class="form-control"/>
+				<span asp-validation-for="Nombre" class="text-danger"></span>
+			</div>
+			<div class="mb-3">
+				<label asp-for="CantidadEnStock" class="form-label">Cantidad en Stock</label>
+				<input asp-for="CantidadEnStock" class="form-control"/>
+				<span asp-validation-for="CantidadEnStock" class="text-danger"></span>
+			</div>
+			<div class="mb-3">
+				<label asp-for="UnidadDeMedida" class="form-label">Unidad de Medida</label>
+				<input asp-for="UnidadDeMedida" class="form-control"/>
+				<span asp-validation-for="UnidadDeMedida" class="text-danger"></span>
+			</div>
+
+			<div class="mt-4">
+				<button type="submit" class="btn btn-primary">Guardar Cambios</button>
+				<a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+			</div>
+		</form>
+	</div>
+</div>
+
+@section Scripts {
+	@{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
