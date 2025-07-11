@@ -17,5 +17,7 @@ namespace PizzeriaOnline.Models
 
         [Required(ErrorMessage = "La unidad de medida es obligatoria.")]
         public string UnidadDeMedida { get; set; }
+
+        public virtual ICollection<PizzaIngrediente> PizzaIngredientes { get; set; }
     }
 }

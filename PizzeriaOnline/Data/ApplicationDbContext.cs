@@ -77,6 +77,9 @@ namespace PizzeriaOnline.Data
                 new Tamaño { Id = 5, Nombre = "Rectangular", Dimensiones = "65cm", NumeroRebanadas = 24, PrecioBase = 500.00m, MaximoSabores = 4 }
 
                 );
+
+            modelBuilder.Entity<PizzaIngrediente>()
+                .HasKey(pi => new { pi.PizzaId, pi.IngredienteId });
         }      
 
         
@@ -91,6 +94,8 @@ namespace PizzeriaOnline.Data
         
         public DbSet<Pedido> Pedidos { get; set; }
         public DbSet<DetallePedido> DetallePedidos { get; set; }
+
+        public DbSet<PizzaIngrediente> PizzaIngredientes { get; set; }
     }
 
 }

@@ -7,5 +7,7 @@
         public string Nombre { get; set; }
         public string Descripcion { get; set; }
         public string RutaImagen{ get; set; }
+
+        public virtual ICollection<PizzaIngrediente> PizzaIngredientes { get; set; }
     }
 }
