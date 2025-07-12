@@ -80,6 +80,9 @@ namespace PizzeriaOnline.Data
 
             modelBuilder.Entity<PizzaIngrediente>()
                 .HasKey(pi => new { pi.PizzaId, pi.IngredienteId });
+
+            modelBuilder.Entity<DetalleSabor>()
+                .HasKey(ds => new { ds.DetallePedidoId, ds.PizzaId });
         }      
 
         
@@ -94,8 +97,8 @@ namespace PizzeriaOnline.Data
         
         public DbSet<Pedido> Pedidos { get; set; }
         public DbSet<DetallePedido> DetallePedidos { get; set; }
-
         public DbSet<PizzaIngrediente> PizzaIngredientes { get; set; }
+        public DbSet<DetalleSabor> DetalleSabores { get; set; }
     }
 
 }

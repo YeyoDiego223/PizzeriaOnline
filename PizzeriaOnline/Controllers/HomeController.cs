@@ -111,16 +111,27 @@ namespace PizzeriaOnline.Controllers
                 // 3. Crear y añadir los Detalles del Pedido
                 foreach (var item in carrito)
                 {
-                    var saboresTexto = string.Join(" / ", item.NombresSabores);
-                    var descripcionCompleta = $"{item.NombreTamaño} ({saboresTexto})";
-
                     var nuevoDetalle = new DetallePedido
                     {
                         Cantidad = item.Cantidad,
                         PrecioUnitario = item.PrecioFinal,
-                        DescripcionProducto = descripcionCompleta
+                        NombreTamaño = item.NombreTamaño,
+                        // La lista de sabores se llenara en el siguente paso
                     };
-                    nuevoPedido.Detalles.Add(nuevoDetalle);
+                    
+                    // Buscamos los IDs de los sabores que el cliente eligió
+                    var pizzasDeEsteItem = _context.Pizzas
+                        .Where(p => item.NombresSabores.Contains(p.Nombre))
+                        .ToList();
+
+                    // Creamos los registros en la tabla puente "DetalleSabor"
+                    foreach (var pizzaSabor in pizzasDeEsteItem)
+                    {
+                        nuevoDetalle.DetalleSabores.Add(new DetalleSabor
+                        {
+                            PizzaId = pizzaSabor.Id
+                        });
+                    }
                 }
 
                 // 4. Guardar todo en la Base de Datos
