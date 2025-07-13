@@ -54,7 +54,44 @@ namespace PizzeriaOnline.Controllers
 
             if (pedido != null && !string.IsNullOrEmpty(nuevoEstado))
             {
+                // Verificamos si el estado cambiado A "En preparación"
+                // y que no lo estuviera ya antes, para evitar descontar el stock dos veces.
+                if (nuevoEstado == "En preparación" && pedido.Estado != "En preparación")
+                {
+                    // --- INICIO DE LA LÓGICA DE DESCUENTO DE INVENTARIO ---
+
+                    // 1. Cargamos los detalles y sabores de este pedido especifico.
+                    var detallesDelPedido = _context.DetallePedidos
+                        .Include(d => d.DetalleSabores)
+                        .Where(d => d.PedidoId == id)
+                        .ToList();
+
+                    foreach (var detalle in detallesDelPedido)
+                    {
+                            // Por cada pizza personalizada en el pedido...
+                            foreach (var sabor in detalle.DetalleSabores)
+                            {
+                                // ...buscamos su receta (la lista de ingredientes y cantidades que necesita).
+                            var receta = _context.PizzaIngredientes
+                                .Where(pi => pi.PizzaId == sabor.PizzaId)
+                                .ToList();
+
+                            foreach (var recetaIngrediente in receta)
+                            {
+                                // Por cada ingrediente en la receta...
+                                var ingredienteEnStock = _context.Ingredientes.Find(recetaIngrediente.IngredienteId);
+                                if (ingredienteEnStock != null)
+                                {
+                                    // ...!descontamos la cantidad del stock!
+                                    ingredienteEnStock.CantidadEnStock -= recetaIngrediente.Cantidad;
+                                }
+                            }
+                        }
+                    }
+                }
+                // --- FIN DE LA LÓGICA DE DESCUENTO ---
                 pedido.Estado = nuevoEstado;
+                // Guardamos TODOS los cambios (el nuevo estado del pedido Y las nuevas cantidades de los ingredientes)
                 _context.SaveChanges();
             }
 
@@ -63,10 +100,14 @@ namespace PizzeriaOnline.Controllers
 
         public IActionResult DetallePedido(int id)
         {
-            var pedidoConDetalles = _context.Pedidos
+           var pedidoConDetalles = _context.Pedidos
+                // 1. Incluye la lista de Detalles del Pedido
                 .Include(p => p.Detalles)
+                // 2. Y LUEGO, por cada Detalle, incluye su lista de Sabores
+                .ThenInclude(d => d.DetalleSabores)
+                // 3. Y LUEGO, por cada Sabor, incluye la información de la Pizza (para tener el nombre)
+                .ThenInclude(ds => ds.Pizza)
                 .FirstOrDefault(p => p.Id == id);
-
             if (pedidoConDetalles == null)
             {
                 return NotFound();

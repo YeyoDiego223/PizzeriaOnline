@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using PizzeriaOnline.Data;
 using PizzeriaOnline.Models;
+using PizzeriaOnline.ViewModels;
 
 namespace PizzeriaOnline.Controllers
 {
@@ -71,22 +72,33 @@ namespace PizzeriaOnline.Controllers
         }
 
 
+        // POST: Recibe el ViewModel del formulario
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(Ingrediente ingrediente)
+        public IActionResult Create(IngredienteCreateViewModel viewModel)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(ingrediente);
+                // "Traducimos" los datos del ViewModel a un nuevo modelo de Ingrediente
+                var nuevoIngrediente = new Ingrediente
+                {
+                    Nombre = viewModel.Nombre,
+                    CantidadEnStock = viewModel.CantidadEnStock,
+                    UnidadDeMedida = viewModel.UnidadDeMedida
+                };
+
+                _context.Add(nuevoIngrediente);
                 _context.SaveChanges();
                 return RedirectToAction(nameof(Index));
             }
-            return View(ingrediente);
+            // Si hay un error, volvemos a mostrar la vista con los datos que el usuario ya había llenado
+            return View(viewModel);
         }
+
+        // GET: Muestra el formulario usando el ViewModel
         public IActionResult Create()
         {
-
-            return View();
+            return View(new IngredienteCreateViewModel());
         }
     }
 }

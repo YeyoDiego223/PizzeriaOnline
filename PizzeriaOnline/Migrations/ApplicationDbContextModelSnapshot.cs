@@ -222,10 +222,6 @@ namespace PizzeriaOnline.Migrations
                     b.Property<int>("Cantidad")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("DescripcionProducto")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("NombreTamaño")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -334,64 +330,6 @@ namespace PizzeriaOnline.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Pizzas");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Descripcion = "Masa maestra, salsa secreta, aceitunas negras, morrón, elote, cebolla morada, pepperoni, piña, champiñones, romero, mozzarella",
-                            Nombre = "Monumental",
-                            RutaImagen = "/images/pizzas/monumental.jpg"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Descripcion = "Masa maestra, salsa secreta, queso mozzarella, albhaca fresca.",
-                            Nombre = "Macarena",
-                            RutaImagen = "/images/pizzas/macarena.jpg"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Descripcion = "Masa maestra, salsa secreta, piña, jamón, mozzarella",
-                            Nombre = "Sevillana",
-                            RutaImagen = "/images/pizzas/sevillana.jpg"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Descripcion = "Masa maestra, salsa secreta, pepperoni , mozzarella",
-                            Nombre = "Manoletina",
-                            RutaImagen = "/images/pizzas/manoletina.jpg"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Descripcion = "Masa maestra, salsa secreta, frijoles, elote, morrón, tocino, chorizo, rodajas de serrano",
-                            Nombre = "Miura",
-                            RutaImagen = "/images/pizzas/miura.jpg"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Descripcion = "Masa maestra salsa secreta, carne de alambre, mozzarella",
-                            Nombre = "Zapopina",
-                            RutaImagen = "/images/pizzas/zapopina.jpg"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Descripcion = "Masa maestra, salsa secreta, queso chihuaha, queso monterrey jack, queso cheddar, queso asadero, queso mozzarela",
-                            Nombre = "Chicuelina",
-                            RutaImagen = "/images/pizzas/chicuelina.jpg"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            Descripcion = "Masa maestra, salsa secreta, carne al pastor, mozzarella",
-                            Nombre = "San Fermin",
-                            RutaImagen = "/images/pizzas/san_fermin.jpg"
-                        });
                 });
 
             modelBuilder.Entity("PizzeriaOnline.Models.PizzaIngrediente", b =>
@@ -401,6 +339,9 @@ namespace PizzeriaOnline.Migrations
 
                     b.Property<int>("IngredienteId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<double>("Cantidad")
+                        .HasColumnType("REAL");
 
                     b.HasKey("PizzaId", "IngredienteId");
 

@@ -105,7 +105,8 @@ namespace PizzeriaOnline.Controllers
                     DireccionEntrega = checkoutModel.DireccionEntrega,
                     Telefono = checkoutModel.Telefono,
                     TotalPedido = carrito.Sum(c => c.PrecioFinal * c.Cantidad),
-                    Estado = "Recibido"
+                    Estado = "Recibido",
+                    Detalles = new List<DetallePedido>()
                 };
 
                 // 3. Crear y añadir los Detalles del Pedido
@@ -116,6 +117,7 @@ namespace PizzeriaOnline.Controllers
                         Cantidad = item.Cantidad,
                         PrecioUnitario = item.PrecioFinal,
                         NombreTamaño = item.NombreTamaño,
+                        DetalleSabores = new List<DetalleSabor>()
                         // La lista de sabores se llenara en el siguente paso
                     };
                     
@@ -132,6 +134,7 @@ namespace PizzeriaOnline.Controllers
                             PizzaId = pizzaSabor.Id
                         });
                     }
+                    nuevoPedido.Detalles.Add(nuevoDetalle);
                 }
 
                 // 4. Guardar todo en la Base de Datos

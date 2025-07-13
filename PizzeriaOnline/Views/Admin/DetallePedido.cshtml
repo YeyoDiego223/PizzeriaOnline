@@ -85,7 +85,14 @@
         @foreach (var detalle in Model.Detalles)
         {
             <tr>
-                <td>@detalle.DescripcionProducto</td>
+                <td>
+                    <strong>@detalle.NombreTamaño</strong>
+                    @{
+                        // Juntamos los nombres de todos los sabores con " / "
+                        var nombresSabores = string.Join(" / ", detalle.DetalleSabores.Select(ds => ds.Pizza.Nombre));
+                    }
+                    <span>(@nombresSabores)</span>
+                </td>
                 <td class="text-center">@detalle.Cantidad</td>
                 <td class="text-end">@detalle.PrecioUnitario.ToString("C")</td>
             </tr>

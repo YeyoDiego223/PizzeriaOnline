@@ -11,17 +11,15 @@ namespace PizzeriaOnline.Models
         public decimal PrecioUnitario { get; set; }
         public string NombreTamaño { get; set; }
 
-        // Un detalle de pedido ahora tiene MUCHOS sabores
         public virtual ICollection<DetalleSabor> DetalleSabores { get; set; }
 
         public int PedidoId { get; set; }
         [ForeignKey("PedidoId")]
         public virtual Pedido Pedido { get; set; }
 
-        // Guardaremos una descripción del producto para la posteridad
-        public string DescripcionProducto { get; set; }
-
-        // --- Relación con el Pedido ---
-
+        public DetallePedido()
+        {
+            DetalleSabores = new List<DetalleSabor>();
+        }
     }
 }

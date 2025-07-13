@@ -38,8 +38,9 @@ namespace PizzeriaOnline.Controllers
                 {
                     IngredienteId = ingrediente.Id,
                     Nombre = ingrediente.Nombre,
-                    // Marcamos el checkbox si la pizza ya tiene este ingrediente asignado
-                    Asignado = pizza.PizzaIngredientes.Any(pi => pi.IngredienteId == ingrediente.Id)
+                    Asignado = pizza.PizzaIngredientes.Any(pi => pi.IngredienteId == ingrediente.Id),
+                    Cantidad = pizza.PizzaIngredientes
+                    .FirstOrDefault(pi => pi.IngredienteId == ingrediente.Id)?.Cantidad ?? 0
                 }).ToList()
             };
             return View(viewModel);
@@ -60,6 +61,7 @@ namespace PizzeriaOnline.Controllers
 
             // Limpiamos las asignaciones anteriores
             pizza.PizzaIngredientes.Clear();
+            _context.SaveChanges();
 
             // Añadimos las nuevas asignaciones basadas en los checkboxes marcados
             foreach (var ingredienteVM in viewModel.Ingredientes)
@@ -69,7 +71,8 @@ namespace PizzeriaOnline.Controllers
                     pizza.PizzaIngredientes.Add(new PizzaIngrediente
                     {
                         PizzaId = pizza.Id,
-                        IngredienteId = ingredienteVM.IngredienteId
+                        IngredienteId = ingredienteVM.IngredienteId,
+                        Cantidad = ingredienteVM.Cantidad
                     });                        
                 }
             }
@@ -123,20 +126,28 @@ namespace PizzeriaOnline.Controllers
         }
         public IActionResult Create()
         {
-            return View();
+            return View(new PizzaCreateViewModel());
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(Pizza pizza)
+        public IActionResult Create(PizzaCreateViewModel viewModel)
         {
-
             if (ModelState.IsValid)
             {
-                _context.Add(pizza);
+                // "Traducimos" del ViewModel al Modelo de la base de datos
+                var nuevaPizza = new Pizza
+                {
+                    Nombre = viewModel.Nombre,
+                    Descripcion = viewModel.Descripcion,
+                    RutaImagen = viewModel.RutaImagen
+                };
+
+                _context.Add(nuevaPizza);
                 _context.SaveChanges();
-            }          
-            return RedirectToAction("I");
+                return RedirectToAction(nameof(Index));
+            }
+            return View(viewModel);
         }
 
         public IActionResult Index()

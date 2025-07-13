@@ -9,5 +9,8 @@
         // Foreign Key para Ingrediente
         public int IngredienteId { get; set; }
         public Ingrediente Ingrediente { get; set; }
+
+        // Cantidad del ingrediente que usa esta pizza
+        public double Cantidad { get; set; }
     }
 }
