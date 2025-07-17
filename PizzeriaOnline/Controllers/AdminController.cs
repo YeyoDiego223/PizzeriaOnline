@@ -54,44 +54,35 @@ namespace PizzeriaOnline.Controllers
 
             if (pedido != null && !string.IsNullOrEmpty(nuevoEstado))
             {
-                // Verificamos si el estado cambiado A "En preparación"
-                // y que no lo estuviera ya antes, para evitar descontar el stock dos veces.
                 if (nuevoEstado == "En preparación" && pedido.Estado != "En preparación")
                 {
-                    // --- INICIO DE LA LÓGICA DE DESCUENTO DE INVENTARIO ---
-
-                    // 1. Cargamos los detalles y sabores de este pedido especifico.
+                    // Cargamos los detalles del pedido con toda la información necesaria
                     var detallesDelPedido = _context.DetallePedidos
-                        .Include(d => d.DetalleSabores)
-                        .Where(d => d.PedidoId == id)
-                        .ToList();
+                                                    .Where(d => d.PedidoId == id)
+                                                    .Include(d => d.DetalleSabores)
+                                                    .ToList();
 
                     foreach (var detalle in detallesDelPedido)
                     {
-                            // Por cada pizza personalizada en el pedido...
-                            foreach (var sabor in detalle.DetalleSabores)
-                            {
-                                // ...buscamos su receta (la lista de ingredientes y cantidades que necesita).
-                            var receta = _context.PizzaIngredientes
-                                .Where(pi => pi.PizzaId == sabor.PizzaId)
-                                .ToList();
+                        // Por cada pizza personalizada en el pedido...
+                        foreach (var sabor in detalle.DetalleSabores)
+                        {
+                            // Buscamos la receta para esta pizza Y este tamaño específico
+                            var receta = _context.Recetas
+                                .FirstOrDefault(r => r.PizzaId == sabor.PizzaId && r.TamañoId == detalle.TamañoId);
 
-                            foreach (var recetaIngrediente in receta)
+                            if (receta != null)
                             {
-                                // Por cada ingrediente en la receta...
-                                var ingredienteEnStock = _context.Ingredientes.Find(recetaIngrediente.IngredienteId);
+                                var ingredienteEnStock = _context.Ingredientes.Find(receta.IngredienteId);
                                 if (ingredienteEnStock != null)
                                 {
-                                    // ...!descontamos la cantidad del stock!
-                                    ingredienteEnStock.CantidadEnStock -= recetaIngrediente.Cantidad;
+                                    ingredienteEnStock.CantidadEnStock -= receta.Cantidad * detalle.Cantidad;
                                 }
                             }
                         }
                     }
                 }
-                // --- FIN DE LA LÓGICA DE DESCUENTO ---
                 pedido.Estado = nuevoEstado;
-                // Guardamos TODOS los cambios (el nuevo estado del pedido Y las nuevas cantidades de los ingredientes)
                 _context.SaveChanges();
             }
 

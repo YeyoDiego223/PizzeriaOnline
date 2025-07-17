@@ -13,11 +13,10 @@ namespace PizzeriaOnline.Models
         // Usamos 'double' para poder manejar decimales (ej: 1.5 Kilos)
         [Required]
         [Range(0, double.MaxValue, ErrorMessage = "La cantidad no puede ser negativa.")]
-        public double CantidadEnStock { get; set; }
+        public decimal CantidadEnStock { get; set; }
 
         [Required(ErrorMessage = "La unidad de medida es obligatoria.")]
         public string UnidadDeMedida { get; set; }
 
-        public virtual ICollection<PizzaIngrediente> PizzaIngredientes { get; set; }
     }
 }

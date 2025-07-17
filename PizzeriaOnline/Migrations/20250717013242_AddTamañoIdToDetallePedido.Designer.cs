@@ -11,8 +11,8 @@ using PizzeriaOnline.Data;
 namespace PizzeriaOnline.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250713215859_InitialModel")]
-    partial class InitialModel
+    [Migration("20250717013242_AddTamañoIdToDetallePedido")]
+    partial class AddTamañoIdToDetallePedido
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -235,6 +235,9 @@ namespace PizzeriaOnline.Migrations
                     b.Property<decimal>("PrecioUnitario")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("TamañoId")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("PedidoId");
@@ -333,11 +336,72 @@ namespace PizzeriaOnline.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Pizzas");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Descripcion = "Masa maestra, salsa secreta, aceitunas negras, morrón, elote, cebolla morada, pepperoni, piña, champiñones, romero, mozzarella",
+                            Nombre = "Monumental",
+                            RutaImagen = "/images/pizzas/monumental.jpg"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Descripcion = "Masa maestra, salsa secreta, queso mozzarella, albhaca fresca.",
+                            Nombre = "Macarena",
+                            RutaImagen = "/images/pizzas/macarena.jpg"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Descripcion = "Masa maestra, salsa secreta, piña, jamón, mozzarella",
+                            Nombre = "Sevillana",
+                            RutaImagen = "/images/pizzas/sevillana.jpg"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Descripcion = "Masa maestra, salsa secreta, pepperoni , mozzarella",
+                            Nombre = "Manoletina",
+                            RutaImagen = "/images/pizzas/manoletina.jpg"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Descripcion = "Masa maestra, salsa secreta, frijoles, elote, morrón, tocino, chorizo, rodajas de serrano",
+                            Nombre = "Miura",
+                            RutaImagen = "/images/pizzas/miura.jpg"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Descripcion = "Masa maestra salsa secreta, carne de alambre, mozzarella",
+                            Nombre = "Zapopina",
+                            RutaImagen = "/images/pizzas/zapopina.jpg"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Descripcion = "Masa maestra, salsa secreta, queso chihuaha, queso monterrey jack, queso cheddar, queso asadero, queso mozzarela",
+                            Nombre = "Chicuelina",
+                            RutaImagen = "/images/pizzas/chicuelina.jpg"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Descripcion = "Masa maestra, salsa secreta, carne al pastor, mozzarella",
+                            Nombre = "San Fermin",
+                            RutaImagen = "/images/pizzas/san_fermin.jpg"
+                        });
                 });
 
-            modelBuilder.Entity("PizzeriaOnline.Models.PizzaIngrediente", b =>
+            modelBuilder.Entity("PizzeriaOnline.Models.Receta", b =>
                 {
                     b.Property<int>("PizzaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TamañoId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("IngredienteId")
@@ -346,11 +410,13 @@ namespace PizzeriaOnline.Migrations
                     b.Property<double>("Cantidad")
                         .HasColumnType("REAL");
 
-                    b.HasKey("PizzaId", "IngredienteId");
+                    b.HasKey("PizzaId", "TamañoId", "IngredienteId");
 
                     b.HasIndex("IngredienteId");
 
-                    b.ToTable("PizzaIngredientes");
+                    b.HasIndex("TamañoId");
+
+                    b.ToTable("Recetas");
                 });
 
             modelBuilder.Entity("PizzeriaOnline.Models.Tamaño", b =>
@@ -404,7 +470,7 @@ namespace PizzeriaOnline.Migrations
                             Id = 3,
                             Dimensiones = "45cm",
                             MaximoSabores = 2,
-                            Nombre = "Mediana",
+                            Nombre = "Familiar",
                             NumeroRebanadas = 12,
                             PrecioBase = 250.00m
                         },
@@ -509,33 +575,36 @@ namespace PizzeriaOnline.Migrations
                     b.Navigation("Pizza");
                 });
 
-            modelBuilder.Entity("PizzeriaOnline.Models.PizzaIngrediente", b =>
+            modelBuilder.Entity("PizzeriaOnline.Models.Receta", b =>
                 {
                     b.HasOne("PizzeriaOnline.Models.Ingrediente", "Ingrediente")
-                        .WithMany("PizzaIngredientes")
+                        .WithMany()
                         .HasForeignKey("IngredienteId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("PizzeriaOnline.Models.Pizza", "Pizza")
-                        .WithMany("PizzaIngredientes")
+                        .WithMany()
                         .HasForeignKey("PizzaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PizzeriaOnline.Models.Tamaño", "Tamaño")
+                        .WithMany()
+                        .HasForeignKey("TamañoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Ingrediente");
 
                     b.Navigation("Pizza");
+
+                    b.Navigation("Tamaño");
                 });
 
             modelBuilder.Entity("PizzeriaOnline.Models.DetallePedido", b =>
                 {
                     b.Navigation("DetalleSabores");
-                });
-
-            modelBuilder.Entity("PizzeriaOnline.Models.Ingrediente", b =>
-                {
-                    b.Navigation("PizzaIngredientes");
                 });
 
             modelBuilder.Entity("PizzeriaOnline.Models.Pedido", b =>
@@ -546,8 +615,6 @@ namespace PizzeriaOnline.Migrations
             modelBuilder.Entity("PizzeriaOnline.Models.Pizza", b =>
                 {
                     b.Navigation("DetalleSabores");
-
-                    b.Navigation("PizzaIngredientes");
                 });
 #pragma warning restore 612, 618
         }

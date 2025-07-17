@@ -10,6 +10,7 @@ namespace PizzeriaOnline.Models
         public int Cantidad { get; set; }
         public decimal PrecioUnitario { get; set; }
         public string NombreTamaño { get; set; }
+        public int TamañoId { get; set; }
 
         public virtual ICollection<DetalleSabor> DetalleSabores { get; set; }
 

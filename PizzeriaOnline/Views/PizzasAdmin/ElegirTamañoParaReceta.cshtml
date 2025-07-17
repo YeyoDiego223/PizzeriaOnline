@@ -1,0 +1,26 @@
+﻿@model List<PizzeriaOnline.Models.Tamaño>
+@{
+	// Recuperamos la información de la pizza que pasamos en el ViewBag
+	var pizza = ViewBag.Pizza as PizzeriaOnline.Models.Pizza;
+	ViewData["Title"] = "Elegir Tamaño para " + pizza.Nombre;
+}
+
+<h1>@ViewData["Title"]</h1>
+<p>Selecciona un tamaño para gestionar su receta de Ingredientes.</p>
+<hr />
+
+<div class="list-group col-md-6">
+	@foreach (var tamaño in Model)
+	{
+		<a	asp-action="GestionarReceta"
+			asp-route-pizzaId="@pizza.Id"
+			asp-route-tamañoId="@tamaño.Id"
+			class="list-group-item list-group-item-action">
+			@tamaño.Nombre (@tamaño.Dimensiones)
+		</a>
+	}
+</div>
+
+<div class="mt-4">
+	<a asp-action="Index" class="btn btn-secondary">Volver a la Lista de Pizzas</a>
+</div>

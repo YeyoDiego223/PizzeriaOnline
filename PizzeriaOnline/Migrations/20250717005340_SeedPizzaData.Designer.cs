@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PizzeriaOnline.Data;
 
@@ -10,9 +11,11 @@ using PizzeriaOnline.Data;
 namespace PizzeriaOnline.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250717005340_SeedPizzaData")]
+    partial class SeedPizzaData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.5");
@@ -232,9 +235,6 @@ namespace PizzeriaOnline.Migrations
                     b.Property<decimal>("PrecioUnitario")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("TamañoId")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("Id");
 
                     b.HasIndex("PedidoId");
@@ -263,8 +263,8 @@ namespace PizzeriaOnline.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<decimal>("CantidadEnStock")
-                        .HasColumnType("TEXT");
+                    b.Property<double>("CantidadEnStock")
+                        .HasColumnType("REAL");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
@@ -404,8 +404,8 @@ namespace PizzeriaOnline.Migrations
                     b.Property<int>("IngredienteId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<decimal>("Cantidad")
-                        .HasColumnType("TEXT");
+                    b.Property<double>("Cantidad")
+                        .HasColumnType("REAL");
 
                     b.HasKey("PizzaId", "TamañoId", "IngredienteId");
 
@@ -467,7 +467,7 @@ namespace PizzeriaOnline.Migrations
                             Id = 3,
                             Dimensiones = "45cm",
                             MaximoSabores = 2,
-                            Nombre = "Familiar",
+                            Nombre = "Mediana",
                             NumeroRebanadas = 12,
                             PrecioBase = 250.00m
                         },

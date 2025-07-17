@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace PizzeriaOnline.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialModel : Migration
+    public partial class AddRecetaModel : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -246,26 +246,33 @@ namespace PizzeriaOnline.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PizzaIngredientes",
+                name: "Recetas",
                 columns: table => new
                 {
                     PizzaId = table.Column<int>(type: "INTEGER", nullable: false),
+                    TamañoId = table.Column<int>(type: "INTEGER", nullable: false),
                     IngredienteId = table.Column<int>(type: "INTEGER", nullable: false),
                     Cantidad = table.Column<double>(type: "REAL", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PizzaIngredientes", x => new { x.PizzaId, x.IngredienteId });
+                    table.PrimaryKey("PK_Recetas", x => new { x.PizzaId, x.TamañoId, x.IngredienteId });
                     table.ForeignKey(
-                        name: "FK_PizzaIngredientes_Ingredientes_IngredienteId",
+                        name: "FK_Recetas_Ingredientes_IngredienteId",
                         column: x => x.IngredienteId,
                         principalTable: "Ingredientes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PizzaIngredientes_Pizzas_PizzaId",
+                        name: "FK_Recetas_Pizzas_PizzaId",
                         column: x => x.PizzaId,
                         principalTable: "Pizzas",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Recetas_Tamaños_TamañoId",
+                        column: x => x.TamañoId,
+                        principalTable: "Tamaños",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -354,9 +361,14 @@ namespace PizzeriaOnline.Migrations
                 column: "PizzaId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PizzaIngredientes_IngredienteId",
-                table: "PizzaIngredientes",
+                name: "IX_Recetas_IngredienteId",
+                table: "Recetas",
                 column: "IngredienteId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Recetas_TamañoId",
+                table: "Recetas",
+                column: "TamañoId");
         }
 
         /// <inheritdoc />
@@ -381,10 +393,7 @@ namespace PizzeriaOnline.Migrations
                 name: "DetalleSabores");
 
             migrationBuilder.DropTable(
-                name: "PizzaIngredientes");
-
-            migrationBuilder.DropTable(
-                name: "Tamaños");
+                name: "Recetas");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
@@ -400,6 +409,9 @@ namespace PizzeriaOnline.Migrations
 
             migrationBuilder.DropTable(
                 name: "Pizzas");
+
+            migrationBuilder.DropTable(
+                name: "Tamaños");
 
             migrationBuilder.DropTable(
                 name: "Pedidos");

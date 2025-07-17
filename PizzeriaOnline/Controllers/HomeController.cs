@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using PizzeriaOnline.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Build.Framework;
 
 namespace PizzeriaOnline.Controllers
 {
@@ -81,23 +82,24 @@ namespace PizzeriaOnline.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult FinalizarPedido(CheckoutViewModel checkoutModel)
         {
             if (ModelState.IsValid)
             {
-                // 1. Cargar el carrito de la sesión
-                var carritoJson = HttpContext.Session.GetString("Carrito");   
+                var carritoJson = HttpContext.Session.GetString("Carrito");
                 if (string.IsNullOrEmpty(carritoJson))
                 {
-                    return RedirectToAction("Index");
+                    // Si no hay carrito, no hay nada que hacer
+                    return RedirectToAction("Index", "Home");
                 }
                 var carrito = JsonConvert.DeserializeObject<List<CarritoItem>>(carritoJson);
                 if (carrito == null || !carrito.Any())
                 {
-                    return RedirectToAction("Index");
+                    return RedirectToAction("Index", "Home");
                 }
 
-                // 2. Crear el objeto Pedido principal
+                // Creamos el pedido principal
                 var nuevoPedido = new Pedido
                 {
                     FechaPedido = DateTime.Now,
@@ -105,11 +107,10 @@ namespace PizzeriaOnline.Controllers
                     DireccionEntrega = checkoutModel.DireccionEntrega,
                     Telefono = checkoutModel.Telefono,
                     TotalPedido = carrito.Sum(c => c.PrecioFinal * c.Cantidad),
-                    Estado = "Recibido",
-                    Detalles = new List<DetallePedido>()
+                    Estado = "Recibido"
                 };
 
-                // 3. Crear y añadir los Detalles del Pedido
+                // Para cada item en el carrito, creamos un DetallePedido y sus DetallesSabor asociados
                 foreach (var item in carrito)
                 {
                     var nuevoDetalle = new DetallePedido
@@ -117,16 +118,16 @@ namespace PizzeriaOnline.Controllers
                         Cantidad = item.Cantidad,
                         PrecioUnitario = item.PrecioFinal,
                         NombreTamaño = item.NombreTamaño,
+                        TamañoId = item.TamañoId,
                         DetalleSabores = new List<DetalleSabor>()
-                        // La lista de sabores se llenara en el siguente paso
                     };
-                    
-                    // Buscamos los IDs de los sabores que el cliente eligió
+
+                    // Buscamos las pizzas (sabores) que corresponden a este item del carrito
                     var pizzasDeEsteItem = _context.Pizzas
                         .Where(p => item.NombresSabores.Contains(p.Nombre))
                         .ToList();
 
-                    // Creamos los registros en la tabla puente "DetalleSabor"
+                    // Creamos la conexión en la tabla puente DetalleSabor
                     foreach (var pizzaSabor in pizzasDeEsteItem)
                     {
                         nuevoDetalle.DetalleSabores.Add(new DetalleSabor
@@ -134,22 +135,22 @@ namespace PizzeriaOnline.Controllers
                             PizzaId = pizzaSabor.Id
                         });
                     }
+
+                    // Añadimos el detalle completo (con sus sabores) al pedido
                     nuevoPedido.Detalles.Add(nuevoDetalle);
                 }
 
-                // 4. Guardar todo en la Base de Datos
+                // Guardamos todo el "árbol" de objetos (Pedido -> Detalles -> DetalleSabores)
                 _context.Pedidos.Add(nuevoPedido);
                 _context.SaveChanges();
 
-                // 5. Limpiar el carrito de las sesión
                 HttpContext.Session.Remove("Carrito");
 
-                //6. Redirigir al usuario (a una futura página de "Gracias")
-                return View("Checkout", checkoutModel);
+                // En el futuro, podríamos redirigr a una página de "Gracias por tu compra"
+                return RedirectToAction("Index");
             }
 
-            // Si el modelo no es valido, volvemos a mostrar el formulario
-            // Ojo: necesitamos recargar el carrito para mostrar el resumen en la vista de chekout
+            // Si el modelo no es valido, recargamos los datos del carrito y volvemos a mostrar la vista de checkout
             var carritoJsonInvalido = HttpContext.Session.GetString("Carrito");
             if(!string.IsNullOrEmpty(carritoJsonInvalido))
             {

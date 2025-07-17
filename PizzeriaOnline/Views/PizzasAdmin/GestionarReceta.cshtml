@@ -1,0 +1,48 @@
+﻿@model PizzeriaOnline.ViewModels.GestionarRecetaViewModel
+
+@{
+	ViewData["Title"] = $"Receta para {Model.PizzaNombre} ({Model.TamañoNombre})";
+}
+
+<h1>@ViewData["Title"]</h1>
+<hr />
+
+<form method="post">
+	@* Campos ocultos para enviar los IDs de vuelta al controlar *@
+	<input type="hidden" asp-for="PizzaId" />
+	<input type="hidden" asp-for="TamañoId" />
+
+	<h4>Selecciona los ingredientes y sus cantidades:</h4>
+	<p><small>La cantidad es por pizza. Usa la unidad de medida indicada.</small></p>
+
+	<div class="list-group">
+		@for (int i = 0; i < Model.Ingredientes.Count; i++)
+		{
+			<div class="list-group-item">
+				<input type="hidden" asp-for="Ingredientes[i].IngredienteId" />
+				<input type="hidden" asp-for="Ingredientes[i].Nombre" />
+				<input type="hidden" asp-for="Ingredientes[i].UnidadDeMedida" />
+
+				<div class="row align-items-center">
+					<div class="col-md-5">
+						<input type="checkbox" asp-for="Ingredientes[i].Asignado" class="form-check-input me-2" />
+						<label asp-for="Ingredientes[i].Asignado" class="form-check-label">
+							<strong>@Model.Ingredientes[i].Nombre</strong>
+						</label>
+					</div>
+					<div class="col-md-7">
+						<div class="input-group">
+							<input type="number" step="0.01" asp-for="Ingredientes[i].Cantidad" class="form-control form-control-sm" placeholder="Cantidad" />
+							<span class="input-group-text">@Model.Ingredientes[i].UnidadDeMedida</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		}
+	</div>
+
+	<div class="mt-4">
+		<button type="submit" class="btn btn-primary">Guardar Receta</button>
+		<a asp-controller="PizzasAdmin" asp-action="Index" class="btn btn-secondary">Cancelar</a>
+	</div>
+</form>

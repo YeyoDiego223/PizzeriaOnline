@@ -9,8 +9,8 @@ namespace PizzeriaOnline.ViewModels
         public string Nombre { get; set; }
 
         [Required]
-        [Range(0, double.MaxValue, ErrorMessage = "La cantidad no puede ser negativa.")]
-        public double CantidadEnStock { get; set; }
+        [Range(0.01, 1000000.00, ErrorMessage = "La cantidad debe ser un valor positivo.")]
+        public decimal CantidadEnStock { get; set; }
 
         [Required(ErrorMessage = "La unidad de medida es obligatoria.")]
         public string UnidadDeMedida { get; set; }
