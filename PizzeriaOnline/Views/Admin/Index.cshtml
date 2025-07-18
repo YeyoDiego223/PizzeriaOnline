@@ -4,14 +4,33 @@
 }
 
 <hi class="display-4">Pedidos Recibidos</hi>
-<form asp-action="Index" asp-controller="Admin" method="get" class="mb-3">
-	<div class="input-group">
-		<input type="text" name="terminoBusqueda" value="@ViewData["BusquedaActual"]" class="form-control" placeholder="Buscar por Nombre o ID Pedido..." />
-		<button type="submit" class="btn btn-primary">
-			<i class="bi bi-search"></i> Buscar
-		</button>
+
+<div class="row mb-4 align-items-end">
+
+	@* Columna para la tarjeta de estadísticas (4 de 12 columnas) *@
+	<div class="col-md-4">
+		<div class="card text-white bg-success">
+			<div class="card-body">
+				<h5 class="card-title">Ventas totales (Completado)</h5>
+				<p class="card-text fs-4 fw-bold">
+					@(((decimal)ViewData["TotalVentas"]).ToString("C"))
+				</p>
+			</div>
+		</div>
 	</div>
-</form>
+
+	@* Columna para el formulario de búsqueda (8 de 12 columnas) *@
+	<div class="col-md-8">
+		<form asp-action="Index" asp-controller="Admin" method="get">
+			<div class="input-group">
+				<input type="text" name="terminoBusqueda" value="@ViewData["BusquedaActual"]" class="form-control" placeholder="Buscar por Nombre o ID de Pedido..." />
+				<button type="submit" class="btn btn-primary">
+					<i class="bi bi-search"></i> Buscar
+				</button>
+			</div>
+		</form>
+	</div>
+</div>
 <p class="lead">Lista de todos los pedidos realizados por los clientes.</p>
 <hr />
 

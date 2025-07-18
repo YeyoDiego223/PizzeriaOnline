@@ -43,6 +43,14 @@ namespace PizzeriaOnline.Controllers
             // 4. Ahora sí, ordenamos y ejecutamos la consulta final (sea la original o la filtrada)
             var listaDePedidos = pedidosQuery.OrderByDescending(p => p.FechaPedido).ToList();
 
+            // Calculamos el total de ventas, sumando solo los pedidos que están 'Completado'.
+            var totalVentas = _context.Pedidos
+                .Where(p => p.Estado == "Completado")
+                .Sum(p => p.TotalPedido);
+
+            // Guardamos el resultado en ViewData para poder usarlo en la vista.
+            ViewData["TotalVentas"] = totalVentas;
+
             return View(listaDePedidos);
         }
        
