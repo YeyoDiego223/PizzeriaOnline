@@ -7,20 +7,60 @@
 
 <div class="row mb-4 align-items-end">
 
-	@* Columna para la tarjeta de estadísticas (4 de 12 columnas) *@
+	@* Columna para Ventas Totales *@
 	<div class="col-md-4">
-		<div class="card text-white bg-success">
+		<div class="card text-white bg-success h-100">
 			<div class="card-body">
-				<h5 class="card-title">Ventas totales (Completado)</h5>
+				<h5 class="card-title">Ventas de hoy</h5>
 				<p class="card-text fs-4 fw-bold">
-					@(((decimal)ViewData["TotalVentas"]).ToString("C"))
+					@(((decimal)ViewData["TotalVentasHoy"]).ToString("C"))
 				</p>
 			</div>
 		</div>
 	</div>
 
+	@* Columna para Pedidos de Hoy *@
+	<div class="col-md-3">
+		<div class="card text-white bg-info h-100">
+			<div class="card-body">
+				<h5 class="card-title">Pedidos de Hoy</h5>
+				<p class="card-text fs-4 fw-bold">
+					@ViewData["PedidosHoy"]
+				</p>
+			</div>
+		</div>
+	</div>
+
+	@* Columna para Alerta de Inventario *@
+	<div class="col-md-3">	
+		<div class="card text-white bg-danger h-100">
+			<div class="card-body">
+				<h5 class="card-title">Inventario Bajo</h5>
+				@{
+					var ingredientesBajos = ViewData["IngredientesBajos"] as List<Ingrediente>;
+					if (ingredientesBajos != null && ingredientesBajos.Any())
+					{
+						<ul class="list-unstyled mb-0 small">
+						@foreach(var ingrediente in ingredientesBajos)
+						{
+							<li>- @ingrediente.Nombre (@ingrediente.CantidadEnStock @ingrediente.UnidadDeMedida)</li>		
+						
+						}
+						</ul>
+					}
+					else
+					{
+						<p class="card-text">¡Todo en orden!</p>
+					}
+				}
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row mb-4">
 	@* Columna para el formulario de búsqueda (8 de 12 columnas) *@
-	<div class="col-md-8">
+	<div class="col-md-12">
 		<form asp-action="Index" asp-controller="Admin" method="get">
 			<div class="input-group">
 				<input type="text" name="terminoBusqueda" value="@ViewData["BusquedaActual"]" class="form-control" placeholder="Buscar por Nombre o ID de Pedido..." />

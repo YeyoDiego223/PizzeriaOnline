@@ -43,13 +43,35 @@ namespace PizzeriaOnline.Controllers
             // 4. Ahora sí, ordenamos y ejecutamos la consulta final (sea la original o la filtrada)
             var listaDePedidos = pedidosQuery.OrderByDescending(p => p.FechaPedido).ToList();
 
+            // Obtener la fecha de hoy, sin la hora.
+            var hoy = DateTime.Today;
+
             // Calculamos el total de ventas, sumando solo los pedidos que están 'Completado'.
-            var totalVentas = _context.Pedidos
-                .Where(p => p.Estado == "Completado")
+            var totalVentasHoy = _context.Pedidos
+                .Where(p => p.Estado == "Completado" && p.FechaPedido.Date == hoy)
                 .Sum(p => p.TotalPedido);
 
             // Guardamos el resultado en ViewData para poder usarlo en la vista.
-            ViewData["TotalVentas"] = totalVentas;
+            ViewData["TotalVentasHoy"] = totalVentasHoy;
+            
+
+            // Contamos cuantos pedidos tienen una FechaPedido mayo o igual a la de hoy.
+            var pedidosHoy = _context.Pedidos
+                .Count(p => p.FechaPedido.Date == hoy);
+
+            // Guardamos el resultado en ViewData
+            ViewData["PedidosHoy"] = pedidosHoy;
+
+            // Definimos un umbral para considerar el stock como bajo.
+            const decimal umbralBajo = 5.0m;
+
+            // Buscamos los ingredientes que están por debajo de ese umbral.
+            var ingredientesBajos = _context.Ingredientes
+                .Where(i => i.CantidadEnStock < umbralBajo)
+                .ToList();
+
+            // Guardamos la lista completa en ViewData.
+            ViewData["IngredientesBajos"] = ingredientesBajos;
 
             return View(listaDePedidos);
         }
