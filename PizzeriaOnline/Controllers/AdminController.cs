@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PizzeriaOnline.Data;
 using PizzeriaOnline.Models;
+using PizzeriaOnline.ViewModels;
 using System.Drawing.Printing;
 
 
@@ -72,6 +73,20 @@ namespace PizzeriaOnline.Controllers
 
             // Guardamos la lista completa en ViewData.
             ViewData["IngredientesBajos"] = ingredientesBajos;
+
+            var pizzasPopulares = _context.DetalleSabores
+                .Include(ds => ds.Pizza)
+                .GroupBy(ds => ds.Pizza.Nombre) // Agrupamos por el nombre de la pizza
+                .Select(g => new PizzaPopularViewModel {
+                    NombrePizza = g.Key,
+                    CantidadVendida = g.Count()
+                })
+                .OrderByDescending(p => p.CantidadVendida)  // Ordenamos de la más vendida a la menos
+                .Take(3)                        // Tomamos solo los 3 primeros resultados
+                .ToList();
+
+            
+            ViewData["PizzasPopulares"] = pizzasPopulares;
 
             return View(listaDePedidos);
         }

@@ -1,14 +1,15 @@
-﻿@model List<PizzeriaOnline.Models.Pedido>
+﻿@using PizzeriaOnline.ViewModels
+@model List<PizzeriaOnline.Models.Pedido>
 @{
 	ViewData["Title"] = "Panel de Administración";
 }
 
 <hi class="display-4">Pedidos Recibidos</hi>
 
-<div class="row mb-4 align-items-end">
+<div class="row mb-4">
 
 	@* Columna para Ventas Totales *@
-	<div class="col-md-4">
+	<div class="col-md-3">
 		<div class="card text-white bg-success h-100">
 			<div class="card-body">
 				<h5 class="card-title">Ventas de hoy</h5>
@@ -51,6 +52,33 @@
 					else
 					{
 						<p class="card-text">¡Todo en orden!</p>
+					}
+				}
+			</div>
+		</div>
+	</div>
+
+	@* Columna para mostrar las Pizzas más vendidas *@
+	<div class="col-md-3">
+		<div class="card text-dark bg-light h-100">
+			<div class="card-body">
+				<h5 class="card-title">Pizzas Populares</h5>
+				@{
+					// Necesitamos convertir el ViewData a su tipo correcto.
+					// Usamos 'dynamic' porque el objeto que creamos en el Select no tiene un nombre de clase formal.
+					var pizzasPopulares = ViewData["PizzasPopulares"] as List<PizzaPopularViewModel>;
+					if (pizzasPopulares != null && pizzasPopulares.Any())
+					{
+						<ol class="mb-0 ps-3 small">
+						@foreach (var pizza in pizzasPopulares)
+							{
+								<li><strong>@pizza.NombrePizza</strong> (@pizza.CantidadVendida vendida(s))</li> 
+							}
+						</ol>
+					}
+					else
+					{
+						<p class="card-text">No hay datos</p>
 					}
 				}
 			</div>
