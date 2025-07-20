@@ -1,0 +1,37 @@
+﻿@model PizzeriaOnline.ViewModels.ProductoExtraCreateViewModel
+
+@{
+	ViewData["Title"] = "Crear Nuevo Producto";
+}
+
+<h1>@ViewData["Title"]</h1>
+<h4>Producto</h4>
+<hr />
+<div class="row">
+	<div class="col-md-6">
+		<form asp-action="Create" method="post">
+			<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+			<div class="mb-3">
+				<label asp-for="Nombre" class="form-label"></label>
+				<input asp-for="Nombre" class="form-control" />
+				<span asp-validation-for="Nombre" class="text-danger"></span>
+			</div>
+			<div class="mb-3">
+				<label asp-for="Precio" class="form-label"></label>
+				<input asp-for="Precio" class="form-control" />
+				<span asp-validation-for="Precio" class="text-danger"></span>
+			</div>
+			<div class="mb-3">
+				<label asp-for="CantidadEnStock" class="form-label">Cantidad</label>
+				<input asp-for="CantidadEnStock" class="form-control" />
+				<span asp-validation-for="CantidadEnStock" class="text-danger"></span>
+			</div>
+
+			<div class="mt-4">
+				<button type="submit" class="btn btn-primary">Crear Producto</button>
+				<a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+			</div>
+		</form>
+	</div>
+</div>

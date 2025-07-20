@@ -112,6 +112,8 @@ namespace PizzeriaOnline.Data
         public DbSet<DetalleSabor> DetalleSabores { get; set; }
         public DbSet<Receta> Recetas { get; set; }
 
+        public DbSet<ProductoExtra> ProductoExtras { get; set; }
+
     }
 
 }

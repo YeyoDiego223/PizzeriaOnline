@@ -166,7 +166,7 @@ namespace PizzeriaOnline.Controllers
                 _context.Update(pizza);
                 _context.SaveChanges();
             }
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
         public IActionResult Create()
         {
