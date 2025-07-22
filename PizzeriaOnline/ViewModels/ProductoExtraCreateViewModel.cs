@@ -12,5 +12,8 @@ namespace PizzeriaOnline.ViewModels
 
         [Required(ErrorMessage = "La cantidad es obligatoria.")]
         public int CantidadEnStock { get; set; }
+
+        [Required(ErrorMessage = "Por favor, selecciona una imagen.")]
+        public IFormFile ImagenArchivo { get; set; }
     }
 }

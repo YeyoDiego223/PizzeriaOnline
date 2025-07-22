@@ -17,5 +17,8 @@ namespace PizzeriaOnline.Models
         [Required(ErrorMessage = "La cantidad es obligatoria.")]
         [Range(0, 10000, ErrorMessage = "La cantidad no puede ser negativa.")]
         public int CantidadEnStock { get; set; }
+
+        [Required(ErrorMessage = "La imagen es obligatoria.")]
+        public string RutaImagen { get; set; }
     }
 }

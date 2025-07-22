@@ -12,11 +12,13 @@ namespace PizzeriaOnline.Controllers
     public class ProductosExtraController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IWebHostEnvironment _hostEnvironment;
 
-        public ProductosExtraController(ApplicationDbContext context)
+        public ProductosExtraController(ApplicationDbContext context, IWebHostEnvironment hostEnvironment)
         {
             _context = context;
-        }
+            _hostEnvironment = hostEnvironment;
+        }     
 
         public IActionResult Index()
         {
@@ -32,19 +34,45 @@ namespace PizzeriaOnline.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(ProductoExtraCreateViewModel viewModel)
+        public async Task<IActionResult> Create(ProductoExtraCreateViewModel viewModel)
         {
             if (ModelState.IsValid)
             {
-                var nuevoProductoExtra = new ProductoExtra
+                string nombreUnicoArchivo = null;
+
+                // 1. Proceso de guardado del archivo
+                if (viewModel.ImagenArchivo != null)
+                {
+                    // Obtenemos la ruta a la carpeta wwwroot
+                    string carpetaUploads = Path.Combine(_hostEnvironment.WebRootPath, "images/productos");
+
+                    if (!Directory.Exists(carpetaUploads))
+                    {
+                        Directory.CreateDirectory(carpetaUploads);
+                    }
+                    // Creamos un nombre de archivo único para evitar colisiones
+                    nombreUnicoArchivo = Guid.NewGuid().ToString() + "_" + viewModel.ImagenArchivo.FileName;
+                    string rutaArchivo = Path.Combine(carpetaUploads, nombreUnicoArchivo);
+
+                    // Usamos un 'using' para asegurarnos de que el archivo se cierre correctamente
+                    using (var fileStream = new FileStream(rutaArchivo, FileMode.Create))
+                    {
+                        await viewModel.ImagenArchivo.CopyToAsync(fileStream);
+                    }
+                }
+
+                // 2. "Traducimos" del viewModel al Modelo de la BD
+                var nuevoProducto = new ProductoExtra
                 {
                     Nombre = viewModel.Nombre,
                     Precio = viewModel.Precio,
                     CantidadEnStock = viewModel.CantidadEnStock,
-                };
+                    // Guardamos solo la ruta relativa en la base de datos
+                    RutaImagen = "/images/productos/" + nombreUnicoArchivo
+                };               
 
-                _context.Add(nuevoProductoExtra);
-                _context.SaveChanges();
+                _context.Add(nuevoProducto);
+                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(viewModel);
@@ -97,5 +125,6 @@ namespace PizzeriaOnline.Controllers
             }
             return RedirectToAction(nameof(Index));
         }
+
     }
 }
