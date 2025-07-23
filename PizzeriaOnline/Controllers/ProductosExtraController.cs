@@ -80,25 +80,81 @@ namespace PizzeriaOnline.Controllers
 
         public IActionResult Edit(int id)
         {
-            var productoExtra = _context.ProductoExtras.Find(id);
-
-            if (productoExtra == null)
+            var producto = _context.ProductoExtras.Find(id);
+            if (producto == null)
             {
                 return NotFound();
             }
-            return View(productoExtra);
+
+            // "Traducimos del modelo de la BD a la ViewModel de edicion"
+            var viewModel = new ProductoExtraEditViewModel
+            {
+                Id = producto.Id,
+                Nombre = producto.Nombre,
+                Precio = producto.Precio,
+                CantidadEnStock = producto.CantidadEnStock,
+                RutaImagenExistente = producto.RutaImagen
+            };
+
+            return View(viewModel);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(ProductoExtra productoExtra)
+        public async Task<IActionResult> Edit(int id, ProductoExtraEditViewModel viewModel)
         {
+            if (id != viewModel.Id)
+            {
+                return NotFound();
+            }
+
             if (ModelState.IsValid)
             {
-                _context.Update(productoExtra);
-                _context.SaveChanges();
+                // Buscamos el productos original en la base de datos
+                var producto = _context.ProductoExtras.Find(viewModel.Id);
+                if (producto == null)
+                {
+                    return NotFound();
+                }
+
+                string nombreUnicoArchivo = viewModel.RutaImagenExistente;
+
+                // Si el usuario subio una NUEVA imagen
+                if (viewModel.ImagenArchivo != null)
+                {
+                    // (Opcional pero recomendado) Borrar la imagen antigua si existe
+                    if (!string.IsNullOrEmpty(viewModel.RutaImagenExistente))
+                    {
+                        string rutaAntigua = Path.Combine(_hostEnvironment.WebRootPath, viewModel.RutaImagenExistente.TrimStart('/'));
+                        if (System.IO.File.Exists(rutaAntigua))
+                        {
+                            System.IO.File.Delete(rutaAntigua);
+                        }
+                    }
+
+                    // Guardar la nueva imagen
+                    string carpetaUploads = Path.Combine(_hostEnvironment.WebRootPath, "images/productos");
+                    nombreUnicoArchivo = Guid.NewGuid().ToString() + "_" + viewModel.ImagenArchivo.FileName;
+                    string rutaArchivo = Path.Combine(carpetaUploads, nombreUnicoArchivo);
+                    using (var fileStream = new FileStream(rutaArchivo, FileMode.Create))
+                    {
+                        await viewModel.ImagenArchivo.CopyToAsync(fileStream);
+                    }
+                    nombreUnicoArchivo = "/images/productos/" + nombreUnicoArchivo; // Guardamos la ruta relativa
+                }
+
+                // Actualizamos los datos del producto con la información del ViewModel
+                producto.Nombre = viewModel.Nombre;
+                producto.Precio = viewModel.Precio;
+                producto.CantidadEnStock = viewModel.CantidadEnStock;
+                producto.RutaImagen = nombreUnicoArchivo;
+
+                _context.Update(producto);
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction(nameof(Index));
             }
-            return RedirectToAction(nameof(Index));
+            return View(viewModel);
         }
        
 

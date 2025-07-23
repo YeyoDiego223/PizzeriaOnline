@@ -12,9 +12,11 @@ namespace PizzeriaOnline.Controllers
     public class PizzasAdminController : Controller
     {
         private readonly ApplicationDbContext _context;
-        public PizzasAdminController(ApplicationDbContext context)
+        private readonly IWebHostEnvironment _hostEnvironment;
+        public PizzasAdminController(ApplicationDbContext context, IWebHostEnvironment hostEnvironment)
         {
             _context = context;
+            _hostEnvironment = hostEnvironment;
         }
 
         // GET: /PizzasAdmin/ElegirTamañoParaReceta/5
@@ -149,24 +151,72 @@ namespace PizzeriaOnline.Controllers
         public IActionResult Edit(int id)
         {
             var pizza = _context.Pizzas.Find(id);
-
             if (pizza == null)
             {
                 return NotFound();
             }
-            return View(pizza);
+
+            var viewModel = new PizzaEditViewModel
+            {
+                Id = pizza.Id,
+                Nombre = pizza.Nombre,
+                Descripcion = pizza.Descripcion,
+                RutaImagenExistente = pizza.RutaImagen
+            };
+
+            return View(viewModel);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(Pizza pizza)
+        public async Task<IActionResult> Edit(int id, PizzaEditViewModel viewModel)
         {
-            if(ModelState.IsValid)
+            if(id != viewModel.Id)
             {
-                _context.Update(pizza);
-                _context.SaveChanges();
+                return NotFound();
             }
-            return RedirectToAction(nameof(Index));
+
+            if (ModelState.IsValid)
+            {
+                var pizza = _context.Pizzas.Find(viewModel.Id);
+                if (pizza == null)
+                {
+                    return NotFound();
+                }
+
+                string nombreUnicoArchivo = viewModel.RutaImagenExistente;
+
+                if (viewModel.ImagenArchivo != null)
+                {
+                    if (!string.IsNullOrEmpty(viewModel.RutaImagenExistente))
+                    {
+                        string rutaAntigua = Path.Combine(_hostEnvironment.WebRootPath, viewModel.RutaImagenExistente.TrimStart('/'));
+                        if (System.IO.File.Exists(rutaAntigua))
+                        {
+                            System.IO.File.Delete(rutaAntigua);
+                        }
+                    }
+
+                    string carpetaUploads = Path.Combine(_hostEnvironment.WebRootPath, "images/pizzas");
+                    nombreUnicoArchivo = Guid.NewGuid().ToString() + "_" + viewModel.ImagenArchivo.FileName;
+                    string rutaArchivo = Path.Combine(carpetaUploads, nombreUnicoArchivo);
+                    using (var fileStream = new FileStream(rutaArchivo, FileMode.Create))
+                    {
+                        await viewModel.ImagenArchivo.CopyToAsync(fileStream);
+                    }
+                    nombreUnicoArchivo = "/images/pizzas/" + nombreUnicoArchivo;
+                }
+
+                pizza.Nombre = viewModel.Nombre;
+                pizza.Descripcion = viewModel.Descripcion;
+                pizza.RutaImagen = nombreUnicoArchivo;
+
+                _context.Update(pizza);
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction(nameof(Index));
+            }
+            return View(viewModel);
         }
         public IActionResult Create()
         {
@@ -175,20 +225,39 @@ namespace PizzeriaOnline.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(PizzaCreateViewModel viewModel)
+        public async Task<IActionResult> Create(PizzaCreateViewModel viewModel)
         {
             if (ModelState.IsValid)
             {
+                string nombreUnicoArchivo = null;
+
+                if (viewModel.ImagenArchivo != null)
+                {
+                    string carpetaUploads = Path.Combine(_hostEnvironment.WebRootPath, "images/pizzas");
+
+                    if (!Directory.Exists(carpetaUploads))
+                    {
+                        Directory.CreateDirectory(carpetaUploads);
+                    }
+                    nombreUnicoArchivo = Guid.NewGuid().ToString() + "_" + viewModel.ImagenArchivo.FileName;
+                    string rutaArchivo = Path.Combine(carpetaUploads, nombreUnicoArchivo);
+
+                    using (var fileStream = new FileStream(rutaArchivo, FileMode.Create))
+                    {
+                        await viewModel.ImagenArchivo.CopyToAsync(fileStream);
+                    }
+                }
+
                 // "Traducimos" del ViewModel al Modelo de la base de datos
                 var nuevaPizza = new Pizza
                 {
                     Nombre = viewModel.Nombre,
                     Descripcion = viewModel.Descripcion,
-                    RutaImagen = viewModel.RutaImagen
+                    RutaImagen = "/images/pizzas/" + nombreUnicoArchivo
                 };
 
                 _context.Add(nuevaPizza);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(viewModel);
