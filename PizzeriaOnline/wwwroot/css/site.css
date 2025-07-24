@@ -20,3 +20,19 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+/* Estilos para hacer el mapa de Google responsivo */
+.map-responsive {
+    overflow: hidden;
+    padding-bottom: 75%; /* Ajusta este valor para cambiar la altura */
+    position: relative;
+    height: 0;
+}
+
+    .map-responsive iframe {
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 100%;
+        position: absolute;
+    }

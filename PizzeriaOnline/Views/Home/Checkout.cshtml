@@ -10,23 +10,57 @@
 	<div class="col-md-7">
 		<h4>Resumen de tu Carrito</h4>
 		<table class="table">
-			@foreach (var item in Model.Carrito)
-			{
-				<tr>
-					<td>
-						<strong>@item.NombreTamaño</strong>
-						<ul class="list-unstyled mb-0 ps-3">
-							@foreach(var sabor in item.NombresSabores)
-							{
-								<li><small>- @sabor</small></li>
-							}
-						</ul>
-					</td>
-					<td class="text-end">@item.PrecioFinal.ToString("C")</td>
-				</tr>
-			}
+			<tbody>
+				@foreach (var item in Model.Carrito)
+				{
+					<tr>
+						<td>
+							<strong>@item.NombreTamaño</strong>
+							<ul class="list-unstyled mb-0 ps-3">
+								@foreach(var sabor in item.NombresSabores)
+								{
+									<li><small>- @sabor</small></li>
+								}
+							</ul>
+						</td>
+						<td class="text-end">@item.PrecioFinal.ToString("C")</td>
+					</tr>
+				}
+
+				@foreach (var extra in Model.CarritoExtras)
+				{
+					<tr>
+						<td>@extra.Nombre <span class="text-muted">x @extra.Cantidad</span></td>
+						<td class="text-end">@extra.Subtotal.ToString("C")</td>
+						<td class="text-end" style="width: 100px;">
+							<form asp-action="QuitarExtra" method="post" class="d-inline">
+								<input type="hidden" name="productoExtraId" value="@extra.ProductoExtraId" />
+								<button type="submit" class="btn btn-danger btn-sm">Quitar</button>
+							</form>
+						</td>
+					</tr>
+				}
+			</tbody>
 		</table>
-		<h4 class="text-end">Total: <span class="text-success">@Model.TotalCarrito.ToString("C")</span></h4>
+		@{
+			var totalFinal = Model.TotalCarrito + Model.CarritoExtras.Sum(e => e.Subtotal);
+		}
+		<h4 class="text-end">Total: <span class="text-success">@totalFinal.ToString("C")</span></h4>
+		<hr />
+		<h4 class="mt-4">¿Desería añadir algo más?</h4>
+		<form asp-action="AgregarExtra" asp-controller="Home" method="post">
+			<div class="input-group mb-3">
+				<select name="productoExtraId" class="form-select">
+					<option value="">Selecciona un producto...</option>
+					@foreach (var extra in Model.ExtrasDisponibles)
+					{
+						<option value="@extra.Id">@extra.Nombre - @extra.Precio.ToString("C")</option>
+					}
+				</select>
+				<input type="number" name="cantidad" value="1" min="1" class="form-control" style="max-width: 80px;" />
+				<button type="submit" class="btn btn-info">Añadir</button>
+			</div>
+		</form>
 		<hr />
 	</div>
 	<div class="col-md-5">

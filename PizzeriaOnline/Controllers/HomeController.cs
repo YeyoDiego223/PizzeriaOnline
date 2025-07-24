@@ -11,6 +11,7 @@ using PizzeriaOnline.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Build.Framework;
+using PizzeriaOnline.ViewModels;
 
 namespace PizzeriaOnline.Controllers
 {
@@ -23,8 +24,77 @@ namespace PizzeriaOnline.Controllers
             _context = context;
         }
 
-        public IActionResult Checkout()
+        [HttpPost]
+        public IActionResult QuitarExtra(int productoExtraId)
         {
+            var carritoExtrasJson = HttpContext.Session.GetString("CarritoExtras");
+            if (string.IsNullOrEmpty(carritoExtrasJson))
+            {
+                return RedirectToAction("Checkout");
+            }
+
+            var carritoExtras = JsonConvert.DeserializeObject<List<CarritoExtraViewModel>>(carritoExtrasJson);
+
+            // Buscamos el item a quitar en la lista.
+            var itemParaQuitar = carritoExtras.FirstOrDefault(i => i.ProductoExtraId == productoExtraId);
+
+            if (itemParaQuitar != null)
+            {
+                // Removemos de la lista.
+                carritoExtras.Remove(itemParaQuitar);
+                // Guardamos la lista modificada de vuelta en la session.
+                HttpContext.Session.SetString("CarritoExtras", JsonConvert.SerializeObject(carritoExtras));
+            }
+
+            // Redirigimos de vuelta a la página de checkout para que vea el cambio..
+            return RedirectToAction("Checkout");
+        }
+
+        [HttpPost]
+        public IActionResult AgregarExtra(int productoExtraId, int cantidad)
+        {
+            // Buscamos el producto en la BD para asegurarnos de que existe y tener su precio.
+            var producto = _context.ProductoExtras.Find(productoExtraId);
+            if (producto == null || cantidad <= 0)
+            {
+                // Si hay un error, simplemente volvemos al checkout.
+                return RedirectToAction("Checkout");
+            }
+
+            // Obtenemos el carrito de extras de la sesión o creamos uno nuevo.
+            var carritoExtrasJson = HttpContext.Session.GetString("CarritoExtras");
+            List<CarritoExtraViewModel> carritoExtras = carritoExtrasJson == null
+                ? new List<CarritoExtraViewModel>()
+                : JsonConvert.DeserializeObject<List<CarritoExtraViewModel>>(carritoExtrasJson);
+
+            // Verificamos si el producto ya esta en el carrito de extras.
+            var itemExistente = carritoExtras.FirstOrDefault(i => i.ProductoExtraId == productoExtraId);
+            if (itemExistente != null)
+            {
+                // Si ya existe, solo aumentamos la cantidad.
+                itemExistente.Cantidad += cantidad;
+            }
+            else
+            {
+                // Si es nuevo, lo añadimos a la lista.
+                carritoExtras.Add(new CarritoExtraViewModel
+                {
+                    ProductoExtraId = producto.Id,
+                    Nombre = producto.Nombre,
+                    Cantidad = cantidad,
+                    PrecioUnitario = producto.Precio
+                });
+            }
+
+            // Guardamos la Lista actualizada de vuelta en la sesión.
+            HttpContext.Session.SetString("CarritoExtras", JsonConvert.SerializeObject(carritoExtras));
+
+            // Redirigimos de vuelta a la página de checkout
+            return RedirectToAction("Checkout");
+        }
+
+        public IActionResult Checkout()
+        {           
             var carritoJson = HttpContext.Session.GetString("Carrito");
             if (string.IsNullOrEmpty(carritoJson))
             {
@@ -38,14 +108,21 @@ namespace PizzeriaOnline.Controllers
             var viewModel = new CheckoutViewModel
             {
                 Carrito = carrito,
-                TotalCarrito = carrito.Sum(item => item.PrecioFinal * item.Cantidad)
+                TotalCarrito = carrito.Sum(item => item.PrecioFinal * item.Cantidad),
+                ExtrasDisponibles = _context.ProductoExtras.Where(p => p.CantidadEnStock > 0).ToList(),
             };
+
+            var carritoExtrasJson = HttpContext.Session.GetString("CarritoExtras");
+            if (!string.IsNullOrEmpty(carritoExtrasJson))
+            {
+                viewModel.CarritoExtras = JsonConvert.DeserializeObject<List<CarritoExtraViewModel>>(carritoExtrasJson);
+            }
 
             return View(viewModel);
         }
 
         [Authorize]
-        public IActionResult Privacy()
+        public IActionResult Contacto()
         {
             return View();
         }
@@ -140,11 +217,37 @@ namespace PizzeriaOnline.Controllers
                     nuevoPedido.Detalles.Add(nuevoDetalle);
                 }
 
+                var carritoExtraJson = HttpContext.Session.GetString("CarritoExtras");
+                if (!string.IsNullOrEmpty(carritoExtraJson))
+                {
+                    var carritoExtras = JsonConvert.DeserializeObject<List<CarritoExtraViewModel>>(carritoExtraJson);
+                    foreach (var extra in carritoExtras)
+                    {
+                        // Creamos una nueva línea de detalle para el producto extra
+                        var nuevoDetalle = new DetallePedido
+                        {
+                            Cantidad = extra.Cantidad,
+                            PrecioUnitario = extra.PrecioUnitario,
+                            // Usaremos la propiedad NombreTamaño para guardar el nombre del producto
+                            NombreTamaño = extra.Nombre
+                        };
+                        nuevoPedido.Detalles.Add(nuevoDetalle);
+
+                        // Lógica para descontar el stock del producto extra
+                        var productoEnStock = _context.ProductoExtras.Find(extra.ProductoExtraId);
+                        if (productoEnStock != null)
+                        {
+                            productoEnStock.CantidadEnStock -= extra.Cantidad;
+                        }
+                    }                    
+                }
+
                 // Guardamos todo el "árbol" de objetos (Pedido -> Detalles -> DetalleSabores)
                 _context.Pedidos.Add(nuevoPedido);
                 _context.SaveChanges();
 
                 HttpContext.Session.Remove("Carrito");
+                HttpContext.Session.Remove("CarritoExtras");
 
                 // En el futuro, podríamos redirigr a una página de "Gracias por tu compra"
                 return RedirectToAction("Index");
