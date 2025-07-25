@@ -24,5 +24,6 @@ namespace PizzeriaOnline.ViewModels
         public List<ProductoExtra> ExtrasDisponibles { get; set; } = new List<ProductoExtra>();
         public List<CarritoExtraViewModel> CarritoExtras { get; set; } = new List<CarritoExtraViewModel>();
 
+
     }
 }
