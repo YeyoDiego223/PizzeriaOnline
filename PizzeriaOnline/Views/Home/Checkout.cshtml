@@ -72,8 +72,12 @@
 	</div>
 	<div class="col-md-5">
 		<h4>Tus Datos</h4>
+		<h4>Ubicación de Entrega</h4>
+		<div id="map" style="height: 300px; width:100%;" class="mb-3"></div>
 		<form asp-action="FinalizarPedido" method="post">
 			<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+			<input type="hidden" asp-for="Latitud"/>
+			<input type="hidden" asp-for="Longitud"/>
 
 			<div class="mb-3">
 				<label asp-for="NombreCliente" class="form-label">Nombre Completo</label>
@@ -101,4 +105,67 @@
 
 @section Scripts {
 	@{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+@section MapScripts {
+	<script>
+		let map;
+		let marker;
+		// Coordenadas iniciales (Centro de Tenancingo de Degollado)
+		const initialPos = { lat: 18.9642, lng: -99.5936 };
+
+		// Referencias a los campos del formulario
+		const latitudInput = document.getElementById("Latitud");
+		const longitudInput = document.getElementById("Longitud");
+		const direccionInput = document.getElementById("DireccionEntrega");
+
+		function initMap() {
+			map = new google.maps.Map(document.getElementById("map"), {
+				center: initialPos,
+				zoom: 15,
+			});
+
+			marker = new google.maps.Marker({
+				position: initialPos,
+				map: map,
+				draggable: true
+			});
+
+			// Inicializamos los valores del formulario con la posición inicial
+			updateFormFields(initialPos.lat, initialPos.lng);
+
+			// Evento que se dispara cuando terminas de arrastrar el pin
+			google.maps.event.addListener(marker, 'dragend', function (event) {
+				const lat = this.getPosition().lat();
+				const lng = this.getPosition().lng();
+				updateFormFields(lat, lng);
+			});
+		}
+
+		function updateFormFields(lat, lng) {
+			// 1. Guardamos las coordenadas en los campos ocultos
+			latitudInput.value = lat;
+			longitudInput.value = lng;
+
+			// 2. Usamos la Geocoding API para obtener la dirección
+			const geocoder = new google.maps.Geocoder();
+			geocoder.geocode({ 'location': { lat: lat, lng: lng } }, function (results, status) {
+				if (status === 'OK') {
+					if (results[0]) {
+						// Ponemos la dirección encontrada en el campo de texto visible
+						direccionInput.value = results[0].formatted_address;
+					} else {
+						window.alert('No se encontraron resultados de dirección');
+					}
+				} else {
+					window.alert('Geocoder falló debido a: ' + status);
+				}
+			});
+		}
+	</script>
+
+	@* Carga la API de Google Maps. REEMPLAZA "TU_API_KEY" con tu llave *@
+	<script async defer
+			src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDCeP0vkmlWa2XjS6yId_h1wWhfIBjn3FU&callback=initMap">
+	</script>
 }

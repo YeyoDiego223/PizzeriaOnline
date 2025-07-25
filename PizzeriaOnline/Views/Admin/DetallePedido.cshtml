@@ -46,7 +46,11 @@
         <h4>Datos del Cliente</h4>
         <ul class="list-group">
             <li class="list-group-item"><strong>Nombre:</strong> @Model.NombreCliente</li>
-            <li class="list-group-item"><strong>Dirección:</strong> @Model.DireccionEntrega</li>
+            <li class="list-group-item"><strong>Dirección:</strong>
+                <a href="https://www.google.com/maps/search/?api=1&query=@Uri.EscapeDataString(Model.DireccionEntrega)" target="_blank">
+                    @Model.DireccionEntrega
+                </a>
+            </li>
             <li class="list-group-item"><strong>Teléfono:</strong> @Model.Telefono</li>
         </ul>
     </div>

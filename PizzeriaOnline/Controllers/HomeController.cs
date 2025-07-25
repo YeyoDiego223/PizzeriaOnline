@@ -162,6 +162,20 @@ namespace PizzeriaOnline.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult FinalizarPedido(CheckoutViewModel checkoutModel)
         {
+            // Coordenadas aproximadas del rectángulo que cubre tu zona de reparto.
+            // Puedes ajustar estos valores para ser más preciso.
+            const double minLat = 18.83; // Límite sur (Zumpahuacan)
+            const double maxLat = 18.99; // Límite Norte (Tenancingo)
+            const double minLng = -99.62; // Límite Oeste
+            const double maxLng = -99.55; // Límite Este
+
+            if (checkoutModel.Latitud < minLat || checkoutModel.Latitud > maxLat ||
+                checkoutModel.Longitud < minLng || checkoutModel.Longitud > maxLng)
+            {
+                // La ubicación esta fuera de la zona. Añadimos un error al modelo.
+                ModelState.AddModelError("", "Lo sentimos, tu ubicación esta fuera de nuestra zona de reparto.");
+            }
+
             if (ModelState.IsValid)
             {
                 var carritoJson = HttpContext.Session.GetString("Carrito");
@@ -260,6 +274,14 @@ namespace PizzeriaOnline.Controllers
                 checkoutModel.Carrito = JsonConvert.DeserializeObject<List<CarritoItem>>(carritoJsonInvalido);
                 checkoutModel.TotalCarrito = checkoutModel.Carrito.Sum(i => i.PrecioFinal * i.Cantidad);
             }
+
+            var carritoExtrasJson = HttpContext.Session.GetString("CarritoExtras");
+            if (!string.IsNullOrEmpty(carritoExtrasJson))
+            {
+                checkoutModel.CarritoExtras = JsonConvert.DeserializeObject<List<CarritoExtraViewModel>>(carritoExtrasJson);
+            }
+            
+            checkoutModel.ExtrasDisponibles = _context.ProductoExtras.Where(p => p.CantidadEnStock > 0).ToList();
             return View("Checkout", checkoutModel);
         }
 
