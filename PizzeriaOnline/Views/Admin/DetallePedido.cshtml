@@ -51,6 +51,18 @@
                     @Model.DireccionEntrega
                 </a>
             </li>
+
+            @if (Model.Latitud.HasValue && Model.Longitud.HasValue)
+            {
+                <li class="list-group-item"><strong>Coordenadas:</strong>
+                    <a href="https://www.google.com/maps?q=@Model.Latitud,@Model.Longitud" target="_blank">
+                        Ver en Google Maps
+                    </a>
+                    <br />
+                    <small class="text-muted">(@Model.Latitud, @Model.Longitud)</small>
+                </li>
+            }
+
             <li class="list-group-item"><strong>Teléfono:</strong> @Model.Telefono</li>
         </ul>
     </div>

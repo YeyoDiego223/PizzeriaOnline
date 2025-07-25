@@ -17,12 +17,12 @@ namespace PizzeriaOnline.Models
         public string Telefono { get; set; }
 
         public decimal TotalPedido { get; set; }
-
         public string Estado { get; set; }
+        public double? Latitud {  get; set; }
+        public double? Longitud { get; set; }
 
         //Propiedad de navegación: Un pedido tiene MUCHOS detalles.
         public virtual ICollection<DetallePedido> Detalles { get; set; }
-
         public Pedido() 
         {
             FechaPedido = DateTime.Now;
