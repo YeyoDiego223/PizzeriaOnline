@@ -119,22 +119,51 @@
 		const longitudInput = document.getElementById("Longitud");
 		const direccionInput = document.getElementById("DireccionEntrega");
 
-		function initMap() {
+			function initMap() {
 			map = new google.maps.Map(document.getElementById("map"), {
-				center: initialPos,
+				center: initialPos, // Mantenemos una posición inicial por si falla
 				zoom: 15,
 			});
 
 			marker = new google.maps.Marker({
-				position: initialPos,
 				map: map,
 				draggable: true
 			});
 
-			// Inicializamos los valores del formulario con la posición inicial
-			updateFormFields(initialPos.lat, initialPos.lng);
+			// --- INICIO DE LA NUEVA LÓGICA DE GEOLOCALIZACIÓN ---
 
-			// Evento que se dispara cuando terminas de arrastrar el pin
+			// Intenta obtener la ubicación del navegador
+			if (navigator.geolocation) {
+				navigator.geolocation.getCurrentPosition(
+					(position) => {
+						// Si el usuario da permiso y se obtiene la ubicación
+						const userPos = {
+							lat: position.coords.latitude,
+							lng: position.coords.longitude,
+						};
+
+						// Centramos el mapa y movemos el marcador a la posición del usuario
+						marker.setPosition(userPos);
+						map.setCenter(userPos);
+
+						// Actualizamos los campos del formulario con la nueva posición
+						updateFormFields(userPos.lat, userPos.lng);
+					},
+					() => {
+						// Si el usuario NIEGA el permiso o hay un error, usamos la posición inicial
+						marker.setPosition(initialPos);
+						updateFormFields(initialPos.lat, initialPos.lng);
+						alert("No se pudo obtener tu ubicación. Por favor, coloca el marcador manualmente.");
+					}
+				);
+			} else {
+				// El navegador no soporta Geolocalización, usamos la posición inicial
+				marker.setPosition(initialPos);
+				updateFormFields(initialPos.lat, initialPos.lng);
+			}
+			// --- FIN DE LA NUEVA LÓGICA ---
+
+			// El evento para cuando el usuario arrastra el pin manualmente sigue funcionando igual
 			google.maps.event.addListener(marker, 'dragend', function (event) {
 				const lat = this.getPosition().lat();
 				const lng = this.getPosition().lng();
