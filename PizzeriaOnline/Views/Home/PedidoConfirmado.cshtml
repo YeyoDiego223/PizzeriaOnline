@@ -1,0 +1,13 @@
+﻿@{
+	ViewData["Title"] = "¡Pedido Confirmado!";
+}
+
+<div class="text-center">
+	<h1 class="display-4 text-success">¡Gracias por tu pedido!</h1>
+	<p class="lead">Hemos recibido tu pedido y ya lo estamos preparando.</p>
+	<hr />
+	<p>Tu número de confirmación es: <strong>#@ViewBag.PedidoId</strong></p>
+	<div class="mt-4">
+		<a asp-action="Index" asp-controller="Home" class="btn btn-primary">Volver al Menú</a>
+	</div>
+</div>

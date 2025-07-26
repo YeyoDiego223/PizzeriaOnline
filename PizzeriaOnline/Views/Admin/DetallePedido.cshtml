@@ -39,7 +39,13 @@
                 }
                 <span class="badge @colorBadge fs-6">@Model.Estado</span>
             </li>
-            <li class="list-group-item"><strong>Total:</strong> <span class="fw-bold text-success">@Model.TotalPedido.ToString("C")</span></li>
+            <li class="list-group-item"><strong>Total:</strong>
+                <span class="fw-bold text-success">
+                    @{
+                        var totalReal = Model.Detalles.Sum(d => d.PrecioUnitario * d.Cantidad);
+                    }
+                    @totalReal.ToString("C")
+                </span></li>
         </ul>
     </div>
     <div class="col-md-6">

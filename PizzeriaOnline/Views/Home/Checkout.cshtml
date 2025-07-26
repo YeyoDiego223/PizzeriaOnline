@@ -1,4 +1,20 @@
 ﻿@model PizzeriaOnline.ViewModels.CheckoutViewModel
+@if (!ViewData.ModelState.IsValid)
+{
+	<div class="alert alert-danger">
+		<strong>Errores de Validación Encontrados:</strong>
+		<ul>
+			@foreach (var value in ViewData.ModelState.Values)
+			{
+				@foreach (var error in value.Errors)
+				{
+					<li>@error.ErrorMessage</li>
+				}
+			}
+		</ul>
+	</div>
+}
+
 @{
 	ViewData["Title"] = "Finalizar Pedido";
 }
@@ -144,8 +160,8 @@
 
 		function updateFormFields(lat, lng) {
 			// 1. Guardamos las coordenadas en los campos ocultos
-			latitudInput.value = lat;
-			longitudInput.value = lng;
+			latitudInput.value = lat.toString().replace(',', '.');
+			longitudInput.value = lng.toString().replace(',', '.');
 
 			// 2. Usamos la Geocoding API para obtener la dirección
 			const geocoder = new google.maps.Geocoder();
