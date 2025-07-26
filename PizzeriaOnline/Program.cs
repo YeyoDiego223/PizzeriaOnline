@@ -1,12 +1,15 @@
 using Microsoft.EntityFrameworkCore;
 using PizzeriaOnline.Data;
 using Microsoft.AspNetCore.Identity;
+using PizzeriaOnline.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.AddDebug();
 
 //Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddSignalR();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -54,5 +57,7 @@ app.MapRazorPages();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapHub<PedidoHub>("/pedidoHub");
 
 app.Run();
