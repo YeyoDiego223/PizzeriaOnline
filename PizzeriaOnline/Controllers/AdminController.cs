@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using PizzeriaOnline.Data;
+using PizzeriaOnline.Hubs;
 using PizzeriaOnline.Models;
 using PizzeriaOnline.ViewModels;
 using System.Drawing.Printing;
@@ -16,10 +18,12 @@ namespace PizzeriaOnline.Controllers
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IHubContext<PedidoHub> _hubContext;
 
-        public AdminController(ApplicationDbContext context)
+        public AdminController(ApplicationDbContext context, IHubContext<PedidoHub> hubContext)
         {
             _context = context;
+            _hubContext = hubContext;
         }
 
         
@@ -93,7 +97,7 @@ namespace PizzeriaOnline.Controllers
        
 
         [HttpPost]
-        public IActionResult ActualizarEstado(int id, string nuevoEstado)
+        public async Task<IActionResult> ActualizarEstado(int id, string nuevoEstado)
         {
             var pedido = _context.Pedidos.Find(id);
 
@@ -128,7 +132,9 @@ namespace PizzeriaOnline.Controllers
                     }
                 }
                 pedido.Estado = nuevoEstado;
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
+
+                await _hubContext.Clients.Group(id.ToString()).SendAsync("RecibirActualizacionEstado", nuevoEstado);
             }
 
             return RedirectToAction("DetallePedido", new { id = id });

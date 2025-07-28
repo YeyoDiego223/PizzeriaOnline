@@ -7,7 +7,50 @@
 	<p class="lead">Hemos recibido tu pedido y ya lo estamos preparando.</p>
 	<hr />
 	<p>Tu número de confirmación es: <strong>#@ViewBag.PedidoId</strong></p>
+	<div class="mt-3">
+		<h4>Estado de tu Pedido: <span id="estado-pedido" class="badge bg-primary fs-5">Recibido</span></h4>
+	</div>
 	<div class="mt-4">
 		<a asp-action="Index" asp-controller="Home" class="btn btn-primary">Volver al Menú</a>
 	</div>
 </div>
+
+@section Scripts {
+    <script>
+        // Creamos una conexión a nuestro Hub en la ruta que definimos en Program.cs
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/pedidoHub")
+            .build();
+
+        // Obtenemos el ID del pedido desde el ViewBag para saber a qué "canal" unirnos
+        const pedidoId = "@ViewBag.PedidoId";
+
+        // --- Definimos qué hacer cuando el servidor nos envía un mensaje ---
+        // El nombre "RecibirActualizacionEstado" debe coincidir con el que usaremos en el servidor.
+        connection.on("RecibirActualizacionEstado", function (nuevoEstado) {
+            console.log("Nuevo estado recibido:", nuevoEstado); // Para depurar
+
+            // Buscamos el elemento en la página para actualizarlo
+            const estadoElement = document.getElementById("estado-pedido");
+            if (estadoElement) {
+                estadoElement.textContent = nuevoEstado;
+                // Opcional: Podríamos añadir lógica para cambiar el color del texto también
+            }
+        });
+
+        // --- Iniciamos la conexión ---
+        connection.start().then(function () {
+            console.log("Conexión con SignalR establecida.");
+
+            // Una vez conectados, le decimos al servidor a qué grupo de pedido queremos unirnos.
+            // Esto es para que solo recibamos actualizaciones de nuestro propio pedido.
+            connection.invoke("UnirseAGrupoPedido", pedidoId).catch(function (err) {
+                return console.error(err.toString());
+            });
+
+        }).catch(function (err) {
+            return console.error(err.toString());
+        });
+
+    </script>
+}
