@@ -135,24 +135,30 @@ else
 		</thead>
 		<tbody>
 			@foreach (var pedido in Model)
-			{				
-					var colorBadge = "bg-secondary";
+			{
+					var colorBadge = "bg-secondary"; // Color por defecto
+					var iconoBadge = "bi-question-circle"; // Icono por defecto
 					switch (pedido.Estado)
 					{
 						case "Recibido":
 							colorBadge = "bg-primary";
+							iconoBadge = "bi-envelope"; // Un sobre
 							break;
 						case "En preparación":
 							colorBadge = "bg-warning text-dark";
+							iconoBadge = "bi-fire"; // Fuego
 							break;
 						case "En camino":
 							colorBadge = "bg-info text-dark";
+							iconoBadge = "bi-truck"; // Un camión
 							break;
 						case "Completado":
 							colorBadge = "bg-success";
+							iconoBadge = "bi-check2-circle"; // Un check
 							break;
 						case "Cancelado":
 							colorBadge = "bg-danger";
+							iconoBadge = "bi-x-circle"; // Una X
 							break;
 					}				
 				<tr>

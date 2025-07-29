@@ -125,7 +125,6 @@ namespace PizzeriaOnline.Controllers
             return View(viewModel);
         }
 
-        [Authorize]
         public IActionResult Contacto()
         {
             return View();

@@ -1,5 +1,13 @@
 ﻿@model PizzeriaOnline.Models.Pedido
 @{
+    var nombreUsuarioChat = "Cliente";
+    if (User?.Identity?.IsAuthenticated ?? false)
+    {
+        nombreUsuarioChat = User.IsInRole("Admin") ? "Admin" : "Cliente";
+    }
+}
+
+@{
     ViewData["Title"] = "Detalle del Pedido #" + Model.Id;
 }
 
@@ -17,27 +25,36 @@
             <li class="list-group-item"><strong>Fecha:</strong> @Model.FechaPedido.ToString("F")</li>
             <li class="list-group-item"><strong>Estado:</strong> 
                 @{
-                    var colorBadge = "bg-secondary"; // Un color por defecto si no coincide ninguno
-                    switch (Model.Estado)                                                                                   
+                    var colorBadge = "bg-secondary"; // Color por defecto
+                    var iconoBadge = "bi-question-circle"; // Icono por defecto
+
+                    switch (Model.Estado) // En la lista, esto será pedido.Estado
                     {
                         case "Recibido":
                             colorBadge = "bg-primary";
+                            iconoBadge = "bi-envelope"; // Un sobre
                             break;
-                        case "En preparacion":
+                        case "En preparación":
                             colorBadge = "bg-warning text-dark";
+                            iconoBadge = "bi-fire"; // Fuego
                             break;
                         case "En camino":
                             colorBadge = "bg-info text-dark";
+                            iconoBadge = "bi-truck"; // Un camión
                             break;
                         case "Completado":
                             colorBadge = "bg-success";
+                            iconoBadge = "bi-check2-circle"; // Un check
                             break;
                         case "Cancelado":
                             colorBadge = "bg-danger";
+                            iconoBadge = "bi-x-circle"; // Una X
                             break;
                     }
                 }
-                <span class="badge @colorBadge fs-6">@Model.Estado</span>
+                <span class="badge @colorBadge fs-6">
+                    <i class="@iconoBadge me-1"></i> @Model.Estado
+                </span>
             </li>
             <li class="list-group-item"><strong>Total:</strong>
                 <span class="fw-bold text-success">
@@ -121,3 +138,92 @@
         }
     </tbody>
 </table>
+
+<hr />
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h4>Chat con la Pizzería</h4>
+        <div id="chat-box" class="border p-3 mb-2" style="height: 200px; overflow-y: scroll;">
+        </div>
+        <div class="input-group">
+            <input type="text" id="mensaje-input" class="form-control" placeholder="Escribe tu mensaje..." />
+            <button id="enviar-mensaje-btn" class="btn btn-primary">Enviar</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // --- 1. CONFIGURACIÓN INICIAL ---
+        const connection = new signalR.HubConnectionBuilder().withUrl("/pedidoHub").build();
+        const pedidoId = "@(Model?.Id.ToString() ?? ViewBag.PedidoId?.ToString())";
+        const nombreUsuarioChat = "@(User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Admin") ? "Admin" : "Cliente")";
+
+        const mensajeInput = document.getElementById("mensaje-input");
+        const enviarMensajeBtn = document.getElementById("enviar-mensaje-btn");
+        const chatBox = document.getElementById("chat-box");
+        const estadoElement = document.getElementById("estado-pedido");
+
+        // --- 2. FUNCIÓN CENTRALIZADA PARA ENVIAR MENSAJE ---
+        function enviarMensaje() {
+            const mensaje = mensajeInput.value;
+            if (mensaje.trim() !== "") {
+                connection.invoke("EnviarMensaje", pedidoId, nombreUsuarioChat, mensaje).catch(err => console.error(err.toString()));
+                mensajeInput.value = "";
+                mensajeInput.focus();
+            }
+        }
+
+        // --- 3. LÓGICA PARA RECIBIR DATOS DEL SERVIDOR ---
+
+        // Lógica para actualizar el estado del pedido en tiempo real
+        connection.on("RecibirActualizacionEstado", function (nuevoEstado) {
+            console.log("Nuevo estado recibido:", nuevoEstado);
+            if (estadoElement) {
+                estadoElement.textContent = nuevoEstado;
+            }
+        });
+
+        // Lógica para recibir un nuevo mensaje del chat
+        connection.on("RecibirMensaje", function (usuario, mensaje) {
+            const p = document.createElement("p");
+            p.innerHTML = `<strong>${usuario}:</strong> ${mensaje}`;
+            chatBox.appendChild(p);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+
+        // Lógica para cargar el historial del chat al conectarse
+        connection.on("CargarHistorial", function (historial) {
+            chatBox.innerHTML = "";
+            historial.forEach(function (mensaje) {
+                const p = document.createElement("p");
+                p.innerHTML = `<strong>${mensaje.autor}:</strong> ${mensaje.texto}`;
+                chatBox.appendChild(p);
+            });
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+
+        // --- 4. ASIGNACIÓN DE EVENTOS ---
+        enviarMensajeBtn.addEventListener("click", function (event) {
+            event.preventDefault();
+            enviarMensaje();
+        });
+
+        mensajeInput.addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                enviarMensaje();
+            }
+        });
+
+        // --- 5. INICIAR CONEXIÓN ---
+        connection.start().then(function () {
+            console.log("Conexión con SignalR establecida.");
+            if (pedidoId) {
+                connection.invoke("UnirseAGrupoPedido", pedidoId).catch(err => console.error(err.toString()));
+            }
+        }).catch(function (err) {
+            return console.error(err.toString());
+        });
+    </script>
+}

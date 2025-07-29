@@ -99,7 +99,7 @@ namespace PizzeriaOnline.Controllers
         [HttpPost]
         public async Task<IActionResult> ActualizarEstado(int id, string nuevoEstado)
         {
-            var pedido = _context.Pedidos.Find(id);
+            var pedido = await _context.Pedidos.FindAsync(id);
 
             if (pedido != null && !string.IsNullOrEmpty(nuevoEstado))
             {
