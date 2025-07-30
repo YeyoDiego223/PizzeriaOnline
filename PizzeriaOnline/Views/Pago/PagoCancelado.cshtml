@@ -1,0 +1,13 @@
+﻿@{
+	ViewData["Title"] = "Pago Cancelado";
+}
+
+<div class="text-center">
+	<h1 class="display-4 text-warning">Pago Cancelado</h1>
+	<p class="lead">El proceso de pago fue cancelado. Tu pedido no ha sido procesado.</p>
+	<hr />
+	<p>Tu pedido con el número <strong>#@ViewBag.PedidoId</strong> ha sido guardado con el estado "Pendiente de Pago"</p>
+	<div class="mt-4">
+		<a asp-action="Carrito" asp-controller="Home" class="btn btn-secondary">Volver al Carrito</a>
+	</div>
+</div>

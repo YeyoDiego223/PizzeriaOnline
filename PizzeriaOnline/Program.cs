@@ -2,11 +2,16 @@ using Microsoft.EntityFrameworkCore;
 using PizzeriaOnline.Data;
 using Microsoft.AspNetCore.Identity;
 using PizzeriaOnline.Hubs;
+using PizzeriaOnline.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.AddDebug();
 
 //Add services to the container.
+
+// Carga la configuración de STripe desde nuestros Secretos de Usuario
+builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
+
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddSignalR();

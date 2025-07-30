@@ -163,7 +163,7 @@ namespace PizzeriaOnline.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> FinalizarPedido(CheckoutViewModel checkoutModel)
+        public async Task<IActionResult> ProcesarPedido(CheckoutViewModel checkoutModel)
         {
             // Recargamos los carritos desde la sesión al principio.
             var carritoJson = HttpContext.Session.GetString("Carrito");
@@ -249,15 +249,17 @@ namespace PizzeriaOnline.Controllers
 
             nuevoPedido.TotalPedido = nuevoPedido.Detalles.Sum(d => d.PrecioUnitario * d.Cantidad);
 
+            // Cambiamos el estado inicial a "Pendiente de Pago"
+            nuevoPedido.Estado = "Pendiente de Pago";
             _context.Pedidos.Add(nuevoPedido);
             await _context.SaveChangesAsync();
 
+            // Limpiamos los carritos
             HttpContext.Session.Remove("Carrito");
             HttpContext.Session.Remove("CarritoExtras");
 
-            // En el futuro, podríamos redirigir a una página de "Gracias".
-            // Por ahora, crearemos una y pasaremos el ID del pedido.
-            return RedirectToAction("PedidoConfirmado", new { id = nuevoPedido.Id });
+            // Redirigimos al controlador de pago con el ID del pedido recién creado
+            return RedirectToAction("CrearCheckoutSession", "Pago", new { pedidoId = nuevoPedido.Id });
         }
 
         public IActionResult PedidoConfirmado(int id)

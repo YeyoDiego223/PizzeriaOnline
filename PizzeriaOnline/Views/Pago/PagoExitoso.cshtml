@@ -1,0 +1,14 @@
+﻿@{
+	ViewData["Title"] = "¡Pago Exitoso!";
+}
+
+<div class="text-center">
+	<h1 class="display-4 text-success">¡Gracias por tu compra!</h1>
+	<p class="lead">Tu pago ha sido procesado correctamente.</p>
+	<hr />
+	<p>Tu número de pedido es: <strong>#@ViewBag.PedidoId</strong></p>
+	<p>Puedes seguir el estado de tu pedido en tiempo real.</p>
+	<div class="mt-4">
+		<a asp-action="PedidoConfirmado" asp-controller="Home" asp-route-id="@ViewBag.PedidoId" class="btn btn-primary">Ver Estado del Pedido</a>
+	</div>
+</div>

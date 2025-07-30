@@ -90,7 +90,7 @@
 		<h4>Tus Datos</h4>
 		<h4>Ubicación de Entrega</h4>
 		<div id="map" style="height: 300px; width:100%;" class="mb-3"></div>
-		<form asp-action="FinalizarPedido" method="post">
+		<form asp-action="ProcesarPedido" method="post">
 			<div asp-validation-summary="ModelOnly" class="text-danger"></div>
 			<input type="hidden" asp-for="Latitud"/>
 			<input type="hidden" asp-for="Longitud"/>
@@ -101,8 +101,9 @@
 				<span asp-validation-for="NombreCliente" class="text-danger"></span>
 			</div>
 			<div class="mb-3">
-				<label asp-for="DireccionEntrega" class="form-label">Dirección de Entrega</label>
-				<input asp-for="DireccionEntrega" class="form-control"/>
+				<label asp-for="DireccionEntrega" class="form-label"></label>
+				<input asp-for="DireccionEntrega" class="form-control" readonly />
+				<div class="form-text">La dirección se obtiene automáticamente al mover el pin en el mapa.</div>
 				<span asp-validation-for="DireccionEntrega" class="text-danger"></span>
 			</div>
 			<div class="mb-3">
