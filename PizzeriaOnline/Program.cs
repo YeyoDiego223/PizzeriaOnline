@@ -9,6 +9,8 @@ builder.Logging.AddDebug();
 
 //Add services to the container.
 
+builder.Services.AddScoped<QnAService>();
+
 // Carga la configuración de STripe desde nuestros Secretos de Usuario
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
 
