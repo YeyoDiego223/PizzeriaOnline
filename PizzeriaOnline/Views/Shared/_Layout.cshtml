@@ -58,11 +58,25 @@
             &copy; 2025 - Pizzería la Querencia - <a asp-area="" asp-controller="Home" asp-action="Contacto">Contacto</a>
         </div>
     </footer>
+    <div id="chatbot-container">
+        <div id="chatbot-window" class="d-none">
+            <div id="chatbot-header">Asistente Virtual</div>
+            <div id="chatbot-messages"></div>
+            <div id="chatbot-input-container">
+                <input type="text" id="chatbot-input" placeholder="Haz una pregunta..." />
+                <button id="chatbot-send-btn">Enviar</button>
+            </div>
+        </div>
+        <button id="chatbot-toggle-btn">
+            <i class="bi bi-robot"></i>
+        </button>
+    </div>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/chatbot.js" asp-append-version="true"></script>
     <script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>    
     @await RenderSectionAsync("MapScripts", required: false)
-    @await RenderSectionAsync("Scripts", required: false)
+    @await RenderSectionAsync("Scripts", required: false)    
 </body>
 </html>
