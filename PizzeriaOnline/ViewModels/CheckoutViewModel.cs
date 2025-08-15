@@ -25,5 +25,7 @@ namespace PizzeriaOnline.ViewModels
         public List<CarritoExtraViewModel> CarritoExtras { get; set; } = new List<CarritoExtraViewModel>();
         public double Latitud {  get; set; }
         public double Longitud { get; set; }
+
+        public string MetodoPago { get; set; }
     }
 }

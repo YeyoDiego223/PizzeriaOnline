@@ -90,18 +90,18 @@
 		<h4>Tus Datos</h4>
 		<h4>Ubicación de Entrega</h4>
 		<div id="map" style="height: 300px; width:100%;" class="mb-3"></div>
-		<form asp-action="ProcesarPedido" method="post">
+		<form asp-action="FinalizarPedido" asp-controller="Home" method="post">
 			<div asp-validation-summary="ModelOnly" class="text-danger"></div>
 			<input type="hidden" asp-for="Latitud"/>
 			<input type="hidden" asp-for="Longitud"/>
-
+			<div class="form-text">Por favor asegurarse de colocar correctamente el marcador a tu ubicación deseada con exactitud. Esto nos ayuda a llegar con exactitud a tu ubicación</div>
 			<div class="mb-3">
 				<label asp-for="NombreCliente" class="form-label">Nombre Completo</label>
 				<input asp-for="NombreCliente" class="form-control"/>
 				<span asp-validation-for="NombreCliente" class="text-danger"></span>
 			</div>
 			<div class="mb-3">
-				<label asp-for="DireccionEntrega" class="form-label"></label>
+				<label asp-for="DireccionEntrega" class="form-label"> Dirección de Entrega</label>
 				<input asp-for="DireccionEntrega" class="form-control" readonly />
 				<div class="form-text">La dirección se obtiene automáticamente al mover el pin en el mapa.</div>
 				<span asp-validation-for="DireccionEntrega" class="text-danger"></span>
@@ -111,7 +111,19 @@
 				<input asp-for="Telefono" class="form-control"/>
 				<span asp-validation-for="Telefono" class="text-danger"></span>
 			</div>
-
+			<h4 class="mt-4">Método de Pago</h4>
+			<div class="form-check">
+				<input class="form-check-input" type="radio" name="MetodoPago" id="pagoTarjeta" value="Tarjeta" checked>
+				<label class="form-check-label" for="pagoTarjeta">
+					Pago con Tarjeta
+				</label>
+			</div>
+			<div class="form-check">
+				<input class="form-check-input" type="radio" name="MetodoPago" id="pagoEfectivo" value="Efectivo">
+				<label class="form-check-label" for="pagoEfectivo">
+					Pago en Efectivo (al recibir)
+				</label>
+			</div>
 			<div class="d-grid gap-2 mt-4">
 				<button type="submit" class="btn btn-primary btn-lg">Confirmar y Realizar Pedido</button>
 				<a asp-action="Carrito" class="btn btn-outline-secondary">Volver al Carrito</a>

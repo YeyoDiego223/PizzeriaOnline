@@ -82,8 +82,13 @@ namespace PizzeriaOnline.Controllers
         // Esta acción se ejecuta si el cliente cancela el pago en la página de Stripe
         public IActionResult PagoCancelado(int id)
         {
-            // Simplemente mostramos una página informando que el pago fue cancelado.
-            // El pedido permanecera en estado "Pendiente de Pago".
+            var pedido = _context.Pedidos.Find(id);
+            if (pedido != null)
+            {
+                // Actualizamos el estado del pedido a "Cancelado:
+                pedido.Estado = "Cancelado";
+                _context.SaveChanges();
+            }
             ViewBag.PedidoId = id;
             return View();
         }

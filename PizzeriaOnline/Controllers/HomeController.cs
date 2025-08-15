@@ -159,108 +159,7 @@ namespace PizzeriaOnline.Controllers
                 carrito = JsonConvert.DeserializeObject<List<CarritoItem>>(carritoJson);
             }
             return View(carrito);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ProcesarPedido(CheckoutViewModel checkoutModel)
-        {
-            // Recargamos los carritos desde la sesión al principio.
-            var carritoJson = HttpContext.Session.GetString("Carrito");
-            var carritoExtrasJson = HttpContext.Session.GetString("CarritoExtras");
-            var carrito = !string.IsNullOrEmpty(carritoJson) ? JsonConvert.DeserializeObject<List<CarritoItem>>(carritoJson) : new List<CarritoItem>();
-            var carritoExtras = !string.IsNullOrEmpty(carritoExtrasJson) ? JsonConvert.DeserializeObject<List<CarritoExtraViewModel>>(carritoExtrasJson) : new List<CarritoExtraViewModel>();
-
-            if (!carrito.Any() && !carritoExtras.Any())
-            {
-                ModelState.AddModelError("", "Tu carrito está vacío.");
-            }
-
-            // Validación de zona de reparto.
-            const double minLat = 18.83, maxLat = 18.99, minLng = -99.62, maxLng = -99.55;
-            if (checkoutModel.Latitud < minLat || checkoutModel.Latitud > maxLat || checkoutModel.Longitud < minLng || checkoutModel.Longitud > maxLng)
-            {
-                ModelState.AddModelError("", "Lo sentimos, tu ubicación está fuera de nuestra zona de reparto.");
-            }
-
-            if (!ModelState.IsValid)
-            {
-                // Si hay cualquier error, reconstruimos el ViewModel y volvemos a la vista.
-                checkoutModel.Carrito = carrito;
-                checkoutModel.CarritoExtras = carritoExtras;
-                checkoutModel.TotalCarrito = carrito.Sum(i => i.PrecioFinal * i.Cantidad) + carritoExtras.Sum(e => e.Subtotal);
-                checkoutModel.ExtrasDisponibles = await _context.ProductoExtras.Where(p => p.CantidadEnStock > 0).ToListAsync();
-                return View("Checkout", checkoutModel);
-            }
-
-            // --- SI TODO ES VÁLIDO, PROCEDEMOS A CREAR EL PEDIDO ---
-
-            var nuevoPedido = new Pedido
-            {
-                FechaPedido = DateTime.Now,
-                NombreCliente = checkoutModel.NombreCliente,
-                DireccionEntrega = checkoutModel.DireccionEntrega,
-                Telefono = checkoutModel.Telefono,
-                Estado = "Recibido",
-                Latitud = checkoutModel.Latitud,
-                Longitud = checkoutModel.Longitud,
-                Detalles = new List<DetallePedido>()
-            };
-
-            // Procesar Pizzas
-            foreach (var item in carrito)
-            {
-                var nuevoDetalle = new DetallePedido
-                {
-                    Cantidad = item.Cantidad,
-                    PrecioUnitario = item.PrecioFinal,
-                    NombreTamaño = item.NombreTamaño,
-                    TamañoId = item.TamañoId,
-                };
-
-                var pizzasDeEsteItem = await _context.Pizzas
-                    .Where(p => item.NombresSabores.Contains(p.Nombre))
-                    .ToListAsync();
-
-                foreach (var pizzaSabor in pizzasDeEsteItem)
-                {
-                    nuevoDetalle.DetalleSabores.Add(new DetalleSabor { PizzaId = pizzaSabor.Id });
-                }
-                nuevoPedido.Detalles.Add(nuevoDetalle);
-
-            }
-
-            // Procesar Extras y descontar su stock
-            foreach (var extra in carritoExtras)
-            {
-                nuevoPedido.Detalles.Add(new DetallePedido
-                {
-                    Cantidad = extra.Cantidad,
-                    PrecioUnitario = extra.PrecioUnitario,
-                    NombreTamaño = extra.Nombre
-                });
-
-                var productoEnStock = await _context.ProductoExtras.FindAsync(extra.ProductoExtraId);
-                if (productoEnStock != null)
-                {
-                    productoEnStock.CantidadEnStock -= extra.Cantidad;
-                }
-            }
-
-            nuevoPedido.TotalPedido = nuevoPedido.Detalles.Sum(d => d.PrecioUnitario * d.Cantidad);
-
-            // Cambiamos el estado inicial a "Pendiente de Pago"
-            nuevoPedido.Estado = "Pendiente de Pago";
-            _context.Pedidos.Add(nuevoPedido);
-            await _context.SaveChangesAsync();
-
-            // Limpiamos los carritos
-            HttpContext.Session.Remove("Carrito");
-            HttpContext.Session.Remove("CarritoExtras");
-
-            // Redirigimos al controlador de pago con el ID del pedido recién creado
-            return RedirectToAction("CrearCheckoutSession", "Pago", new { pedidoId = nuevoPedido.Id });
-        }
+        }      
 
         public IActionResult PedidoConfirmado(int id)
         {
@@ -326,6 +225,119 @@ namespace PizzeriaOnline.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> FinalizarPedido(CheckoutViewModel checkoutModel)
+        {
+            // Recargamos los carritos desde la sesión para trabajar con datos fiables
+            var carritoJson = HttpContext.Session.GetString("Carrito");
+            var carritoExtrasJson = HttpContext.Session.GetString("CarritoExtras");
+            var carrito = !string.IsNullOrEmpty(carritoJson) ? JsonConvert.DeserializeObject<List<CarritoItem>>(carritoJson) : new List<CarritoItem>();
+            var carritoExtras = !string.IsNullOrEmpty(carritoExtrasJson) ? JsonConvert.DeserializeObject<List<CarritoExtraViewModel>>(carritoExtrasJson) : new List<CarritoExtraViewModel>();
+
+            if (!carrito.Any() && !carritoExtras.Any())
+            {
+                ModelState.AddModelError("", "Tu carrito está vacío.");
+            }
+
+            // Validación de zona de reparto
+            const double minLat = 18.83, maxLat = 18.99, minLng = -99.62, maxLng = -99.55;
+            if (checkoutModel.Latitud < minLat || checkoutModel.Latitud > maxLat || checkoutModel.Longitud < minLng || checkoutModel.Longitud > maxLng)
+            {
+                ModelState.AddModelError("", "Lo sentimos, tu ubicación está fuera de nuestra zona de reparto.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                // Si hay cualquier error, reconstruimos el ViewModel y volvemos a la vista
+                checkoutModel.Carrito = carrito;
+                checkoutModel.CarritoExtras = carritoExtras;
+                checkoutModel.TotalCarrito = carrito.Sum(i => i.PrecioFinal * i.Cantidad) + carritoExtras.Sum(e => e.Subtotal);
+                checkoutModel.ExtrasDisponibles = await _context.ProductoExtras.Where(p => p.CantidadEnStock > 0).ToListAsync();
+                return View("Checkout", checkoutModel);
+            }
+
+            // --- SI TODO ES VÁLIDO, PROCEDEMOS ---
+
+            var nuevoPedido = new Pedido
+            {
+                FechaPedido = DateTime.Now,
+                NombreCliente = checkoutModel.NombreCliente,
+                DireccionEntrega = checkoutModel.DireccionEntrega,
+                Telefono = checkoutModel.Telefono,
+                Estado = "Pendiente de Pago", // Cambiado para el flujo de pago
+                MetodoPago = checkoutModel.MetodoPago,
+                Latitud = checkoutModel.Latitud,
+                Longitud = checkoutModel.Longitud,
+                Detalles = new List<DetallePedido>()
+            };
+
+            decimal totalCalculado = 0;
+
+            // Procesar Pizzas
+            foreach (var item in carrito)
+            {
+                var nuevoDetalle = new DetallePedido
+                {
+                    Cantidad = item.Cantidad,
+                    PrecioUnitario = item.PrecioFinal,
+                    NombreTamaño = item.NombreTamaño,
+                    TamañoId = item.TamañoId
+                };
+
+                var pizzasDeEsteItem = await _context.Pizzas
+                    .Where(p => item.NombresSabores.Contains(p.Nombre))
+                    .ToListAsync();
+
+                foreach (var pizzaSabor in pizzasDeEsteItem)
+                {
+                    nuevoDetalle.DetalleSabores.Add(new DetalleSabor { PizzaId = pizzaSabor.Id });
+                }
+                nuevoPedido.Detalles.Add(nuevoDetalle);
+                totalCalculado += nuevoDetalle.PrecioUnitario * nuevoDetalle.Cantidad;
+            }
+
+            // Procesar Extras
+            foreach (var extra in carritoExtras)
+            {
+                nuevoPedido.Detalles.Add(new DetallePedido
+                {
+                    Cantidad = extra.Cantidad,
+                    PrecioUnitario = extra.PrecioUnitario,
+                    NombreTamaño = extra.Nombre
+                });
+                totalCalculado += extra.PrecioUnitario * extra.Cantidad;
+            }
+
+            nuevoPedido.TotalPedido = totalCalculado;
+
+            nuevoPedido.MetodoPago = checkoutModel.MetodoPago;
+
+            // Decidimos a dónde redirigir según el método de pago
+            if (checkoutModel.MetodoPago == "Tarjeta")
+            {
+                nuevoPedido.Estado = "Pendiente de Pago";
+                _context.Pedidos.Add(nuevoPedido);
+                await _context.SaveChangesAsync();
+
+                HttpContext.Session.Remove("Carrito");
+                HttpContext.Session.Remove("CarritoExtras");
+
+                return RedirectToAction("CrearCheckoutSession", "Pago", new { pedidoId = nuevoPedido.Id });
+            }
+            else // Efectivo
+            {
+                nuevoPedido.Estado = "Recibido";
+                _context.Pedidos.Add(nuevoPedido);
+                await _context.SaveChangesAsync();
+
+                HttpContext.Session.Remove("Carrito");
+                HttpContext.Session.Remove("CarritoExtras");
+
+                return RedirectToAction("PedidoConfirmado", new { id = nuevoPedido.Id });
+            }
         }
     }
 }

@@ -18,15 +18,21 @@ namespace PizzeriaOnline.Models
 
         public decimal TotalPedido { get; set; }
         public string Estado { get; set; }
-        public double? Latitud {  get; set; }
+        public double? Latitud { get; set; }
         public double? Longitud { get; set; }
 
-        //Propiedad de navegación: Un pedido tiene MUCHOS detalles.
+        [Required]
+        public string MetodoPago { get; set; }
+
+        // 1. Esta es la ÚNICA declaración de la propiedad.
         public virtual ICollection<DetallePedido> Detalles { get; set; }
-        public Pedido() 
+
+        // 2. El constructor le da un valor inicial a la propiedad de arriba.
+        public Pedido()
         {
             FechaPedido = DateTime.Now;
-            Detalles = new List<DetallePedido>();
+            Detalles = new List<DetallePedido>(); // Aquí se inicializa
         }
+
     }
 }
