@@ -97,32 +97,28 @@ namespace PizzeriaOnline.Controllers
             return RedirectToAction("Checkout");
         }
 
-        public IActionResult Checkout()
+        public async Task<IActionResult> Checkout()
         {           
             var carritoJson = HttpContext.Session.GetString("Carrito");
-            if (string.IsNullOrEmpty(carritoJson))
-            {
-                // Si no hay carrito, no se puede hacer checkout. Lo mandamos al carrito vacío.
-                return RedirectToAction("Carrito");
-            }
+            var carritoExtrasJson = HttpContext.Session.GetString("CarritoExtras");
 
-            var carrito = JsonConvert.DeserializeObject<List<CarritoItem>>(carritoJson);
+            var carrito = !string.IsNullOrEmpty(carritoJson)
+                ? JsonConvert.DeserializeObject<List<CarritoItem>>(carritoJson)
+                : new List<CarritoItem>();
 
-            // Creamos el ViewModel y lo llenamos con los datos del carrito
-            var viewModel = new CheckoutViewModel
+            var carritoExtras = !string.IsNullOrEmpty(carritoExtrasJson)
+                ? JsonConvert.DeserializeObject<List<CarritoExtraViewModel>>(carritoExtrasJson)
+                : new List<CarritoExtraViewModel>();
+
+            var viewMdel = new CheckoutViewModel
             {
                 Carrito = carrito,
-                TotalCarrito = carrito.Sum(item => item.PrecioFinal * item.Cantidad),
-                ExtrasDisponibles = _context.ProductoExtras.Where(p => p.CantidadEnStock > 0).ToList(),
+                CarritoExtras = carritoExtras,
+                TotalCarrito = carrito.Sum(item => item.PrecioFinal * item.Cantidad) + carritoExtras.Sum(e => e.Subtotal),
+                ExtrasDisponibles = await _context.ProductoExtras.Where(p => p.CantidadEnStock > 0).ToListAsync()
             };
 
-            var carritoExtrasJson = HttpContext.Session.GetString("CarritoExtras");
-            if (!string.IsNullOrEmpty(carritoExtrasJson))
-            {
-                viewModel.CarritoExtras = JsonConvert.DeserializeObject<List<CarritoExtraViewModel>>(carritoExtrasJson);
-            }
-
-            return View(viewModel);
+            return View(viewMdel);
         }
 
         public IActionResult Contacto()
@@ -341,5 +337,3 @@ namespace PizzeriaOnline.Controllers
         }
     }
 }
-
-// ---- FIN DEL CÓDIGO ----

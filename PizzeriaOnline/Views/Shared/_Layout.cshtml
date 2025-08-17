@@ -60,19 +60,12 @@
         </div>
     </footer>
     
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    <script src="~/js/chatbot.js" asp-append-version="true"></script>
-    <script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>    
-    @await RenderSectionAsync("MapScripts", required: false)
-    @await RenderSectionAsync("Scripts", required: false)
-
     <div id="chatbot-container">
-        <div id="chatbot-window" class="chatbot-hidden">
+        <div id="chatbot-window" class="d-none">
             <div id="chatbot-header">
                 <span>Asistente Virtual</span>
-                <button id="chatbot-close-btn">x</button> </div>
+                <button id="chatbot-close-btn">x</button>
+            </div>
             <div id="chatbot-messages"></div>
             <div id="chatbot-input-container">
                 <input type="text" id="chatbot-input" placeholder="Haz una pregunta..." />
@@ -85,5 +78,19 @@
             <i class="bi bi-robot"></i>
         </button>
     </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @* --- CARGA SIGNALR PRIMERO --- *@
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>
+
+    @* --- Y LUEGO TU SCRIPT QUE LO USA --- *@
+    <script src="~/js/chatbot.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("MapScripts", required: false)
+    @await RenderSectionAsync("Scripts", required: false)
+    
 </body>
 </html>

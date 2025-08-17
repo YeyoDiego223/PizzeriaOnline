@@ -10,8 +10,7 @@
 
     // Función para abrir/cerrar
     function toggleChatWindow() {
-        chatWindow.classList.toggle('chatbot-hidden');
-        chatWindow.classList.toggle('chatbot-visible');
+        chatWindow.classList.toggle('d-none');        
     }
 
     // --- Asignación de eventos ---
