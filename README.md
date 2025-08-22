@@ -67,7 +67,7 @@ Este proyecto fue construido desde cero, enfocándose en prácticas de desarroll
 ### Sistema de login
 <img width="1859" height="885" alt="image" src="https://github.com/user-attachments/assets/87edcb4c-fd27-4ed1-95cc-59775c489fed" />
 
-### Área de Contaco con la Pizzería
+### Área de Contacto con la Pizzería
 <img width="1846" height="883" alt="image" src="https://github.com/user-attachments/assets/e518eb44-dbbf-4601-8420-c70972c179a9" />
 
 ### Detalle de los pedidos
