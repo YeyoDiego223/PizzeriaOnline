@@ -1,0 +1,70 @@
+﻿@{
+    ViewData["Title"] = "Mis Pedidos Activos";
+}
+
+<h1>@ViewData["Title"]</h1>
+<p>Aquí puedes ver el estado de los pedidos que has realizado recientemente desde este navegador.</p>
+
+<div id="lista-pedidos" class="list-group">
+    <div class="text-center p-5">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', async function () {
+            const contenedor = document.getElementById('lista-pedidos');
+            const tokens = JSON.parse(localStorage.getItem('pedidosActivos')) || [];
+
+            contenedor.innerHTML = ''; // Limpiamos el spinner
+
+            if (tokens.length === 0) {
+                contenedor.innerHTML = '<p class="text-muted">No tienes pedidos activos en este momento.</p>';
+                return;
+            }
+
+            // --- RECOMENDACIÓN: Aquí filtramos los pedidos completados ---
+            function limpiarPedidosCompletados(tokensRecibidos) {
+                const tokensActivos = tokensRecibidos
+                    .filter(p => p.estado !== "Completado" && p.estado !== "Cancelado")
+                    .map(p => p.token);
+
+                localStorage.setItem('pedidosActivos', JSON.stringify(tokensActivos));
+            }
+
+            // Hacemos una petición al servidor por cada token para obtener sus detalles
+            const promesas = tokens.map(token => fetch(`/Home/ObtenerDetallesPedido?token=${token}`).then(res => res.json()));
+
+            const resultados = await Promise.all(promesas);
+
+            const pedidosValidos = resultados.filter(p => p.id > 0);
+            limpiarPedidosCompletados(pedidosValidos);
+
+
+            if (pedidosValidos.length === 0) {
+                 contenedor.innerHTML = '<p class="text-muted">No tienes pedidos activos en este momento.</p>';
+                 return;
+            }
+
+            pedidosValidos.forEach(pedido => {
+                if (pedido.estado === "Completado" || pedido.estado === "Cancelado") return;
+
+                const link = document.createElement('a');
+                link.href = `/Home/VerPedido?token=${pedido.token}`;
+                link.className = 'list-group-item list-group-item-action';
+                link.innerHTML = `
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">Pedido #${pedido.id}</h5>
+                        <small>${new Date(pedido.fecha).toLocaleString()}</small>
+                    </div>
+                    <p class="mb-1">Estado actual: <strong>${pedido.estado}</strong></p>
+                    <small>Haz clic para ver los detalles y chatear con nosotros.</small>
+                `;
+                contenedor.appendChild(link);
+            });
+        });
+    </script>
+}

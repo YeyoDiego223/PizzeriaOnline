@@ -249,7 +249,7 @@ namespace PizzeriaOnline.Controllers
             HttpContext.Session.Remove("Carrito");
             HttpContext.Session.Remove("CarritoExtras");
 
-            return RedirectToAction("PedidoConfirmado", new { id = nuevoPedido.Id });
+            return RedirectToAction("VerPedido", new { token = nuevoPedido.AccesoToken });
         }
 
         // --- MÉTODOS PRIVADOS AUXILIARES ---
@@ -280,8 +280,10 @@ namespace PizzeriaOnline.Controllers
                 MetodoPago = checkoutModel.MetodoPago,
                 Latitud = checkoutModel.Latitud,
                 Longitud = checkoutModel.Longitud,
-                Detalles = new List<DetallePedido>()
+                Detalles = new List<DetallePedido>(),
+                AccesoToken = Guid.NewGuid()
             };
+
 
             decimal totalCalculado = 0;
 
@@ -324,6 +326,54 @@ namespace PizzeriaOnline.Controllers
 
             nuevoPedido.TotalPedido = totalCalculado;
             return nuevoPedido;
+        }
+
+        public async Task<IActionResult> VerPedido(Guid token)
+        {
+            if (token == Guid.Empty)
+            {
+                return NotFound();
+            }
+
+            var pedido = await _context.Pedidos.FirstOrDefaultAsync(p => p.AccesoToken == token);
+
+            if (pedido == null)
+            {
+                return NotFound();
+            }
+
+            return View("PedidoConfirmado", pedido);
+        }
+
+        public IActionResult MisPedidos()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ObtenerDetallesPedido(Guid token)
+        {
+            if (token == Guid.Empty)
+            {
+                return NotFound();
+            }
+
+            var pedido = await _context.Pedidos
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.AccesoToken == token);
+
+            if (pedido == null)
+            {
+                return Json(new { error = "Pedido no encontrado " });
+            }
+
+            return Json(new
+            {
+                id = pedido.Id,
+                fecha = pedido.FechaPedido,
+                estado = pedido.Estado,
+                token = pedido.AccesoToken
+            });
         }
     }
 }

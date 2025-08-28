@@ -24,10 +24,14 @@ namespace PizzeriaOnline.Models
         [Required]
         public string MetodoPago { get; set; }
 
+        public Guid AccesoToken { get; set; }
+
         // 1. Esta es la ÚNICA declaración de la propiedad.
         public virtual ICollection<DetallePedido> Detalles { get; set; }
 
         // 2. El constructor le da un valor inicial a la propiedad de arriba.
+
+
         public Pedido()
         {
             FechaPedido = DateTime.Now;
