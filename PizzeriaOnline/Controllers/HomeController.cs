@@ -1,19 +1,20 @@
 ﻿// ---- INICIO DEL CÓDIGO CORRECTO Y LIMPIO ----
 
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Build.Framework;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
+using Newtonsoft.Json;
 using PizzeriaOnline.Data;
 using PizzeriaOnline.Models;
+using PizzeriaOnline.ViewModels;
+using PizzeriaOnline.ViewModels;
 using System.Diagnostics;
-using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
-using PizzeriaOnline.ViewModels;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.Build.Framework;
-using PizzeriaOnline.ViewModels;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 
 namespace PizzeriaOnline.Controllers
 {
@@ -28,59 +29,127 @@ namespace PizzeriaOnline.Controllers
             _logger = logger;
         }
 
-        [HttpPost]
-        public IActionResult QuitarExtra(int productoExtraId)
+        public IActionResult Index()
         {
-            var carritoExtrasJson = HttpContext.Session.GetString("CarritoExtras");
-            if (string.IsNullOrEmpty(carritoExtrasJson))
+            var listaDePizzas = _context.Pizzas.ToList();
+            return View(listaDePizzas);
+        }
+
+        public IActionResult Constructor()
+        {
+            var viewModel = new ConstructorViewModel
             {
-                return RedirectToAction("Checkout");
-            }
-
-            var carritoExtras = JsonConvert.DeserializeObject<List<CarritoExtraViewModel>>(carritoExtrasJson);
-
-            // Buscamos el item a quitar en la lista.
-            var itemParaQuitar = carritoExtras.FirstOrDefault(i => i.ProductoExtraId == productoExtraId);
-
-            if (itemParaQuitar != null)
-            {
-                // Removemos de la lista.
-                carritoExtras.Remove(itemParaQuitar);
-                // Guardamos la lista modificada de vuelta en la session.
-                HttpContext.Session.SetString("CarritoExtras", JsonConvert.SerializeObject(carritoExtras));
-            }
-
-            // Redirigimos de vuelta a la página de checkout para que vea el cambio..
-            return RedirectToAction("Checkout");
+                // Primero trae los datos con ToList(), LUEGO ordena con OrderBy()
+                TamañosDisponibles = _context.Tamaños.ToList().OrderBy(t => t.PrecioBase).ToList(),
+                SaboresDisponibles = _context.Pizzas.OrderBy(p => p.Nombre).ToList()
+            };
+            return View(viewModel);
         }
 
         [HttpPost]
-        public IActionResult AgregarExtra(int productoExtraId, int cantidad)
+        [ValidateAntiForgeryToken]
+        // Cambiamos el parámetro para que acepte los datos directamente del formulario
+        public IActionResult AgregarPizzaPersonalizada(int tamañoId, List<int> saboresIds)
         {
-            // Buscamos el producto en la BD para asegurarnos de que existe y tener su precio.
-            var producto = _context.ProductoExtras.Find(productoExtraId);
-            if (producto == null || cantidad <= 0)
+            // 1. Validamos que recibimos los datos necesarios
+            if (tamañoId <= 0 || saboresIds == null || !saboresIds.Any())
             {
-                // Si hay un error, simplemente volvemos al checkout.
-                return RedirectToAction("Checkout");
+                // Si faltan datos, redirigimos de vuelta al constructor
+                return RedirectToAction("Constructor");
             }
 
-            // Obtenemos el carrito de extras de la sesión o creamos uno nuevo.
-            var carritoExtrasJson = HttpContext.Session.GetString("CarritoExtras");
-            List<CarritoExtraViewModel> carritoExtras = carritoExtrasJson == null
-                ? new List<CarritoExtraViewModel>()
-                : JsonConvert.DeserializeObject<List<CarritoExtraViewModel>>(carritoExtrasJson);
+            // 2. Obtenemos el objeto 'Tamaño' desde la base de datos
+            var tamaño = _context.Tamaños.Find(tamañoId);
+            if (tamaño == null)
+            {
+                // Si el tamaño no existe, no podemos continuar
+                return RedirectToAction("Constructor");
+            }
 
-            // Verificamos si el producto ya esta en el carrito de extras.
+            // 3. Obtenemos los nombres de los sabores seleccionados
+            var nombresSabores = _context.Pizzas
+                                        .Where(p => saboresIds.Contains(p.Id))
+                                        .Select(p => p.Nombre)
+                                        .ToList();
+
+            // 4. Creamos el nuevo item para el carrito
+            var nuevoItem = new CarritoItem
+            {
+                // Se genera un nuevo ID único para este item en el carrito
+                Id = Guid.NewGuid(),
+                TamañoId = tamaño.Id,
+                NombreTamaño = tamaño.Nombre,
+                // El precio final es el precio base del tamaño
+                PrecioFinal = tamaño.PrecioBase,
+                // Agregamos la lista de nombres de sabores que consultamos
+                NombresSabores = nombresSabores,
+                Cantidad = 1
+            };
+
+            // 5. Obtenemos el carrito actual de la sesión (o creamos uno nuevo si no existe)
+            var carritoJson = HttpContext.Session.GetString("Carrito");
+            var carrito = string.IsNullOrEmpty(carritoJson)
+                ? new List<CarritoItem>()
+                : JsonConvert.DeserializeObject<List<CarritoItem>>(carritoJson);
+
+            // 6. Agregamos el nuevo item y guardamos el carrito de vuelta en la sesión
+            carrito.Add(nuevoItem);
+            HttpContext.Session.SetString("Carrito", JsonConvert.SerializeObject(carrito));
+
+            // 7. Redirigimos al usuario a la vista del carrito para que vea su pizza
+            return RedirectToAction("Carrito");
+        }
+
+        public async Task<IActionResult> Carrito()
+        {
+            var carritoJson = HttpContext.Session.GetString("Carrito");
+            var carritoExtrasJson = HttpContext.Session.GetString("CarritoExtras");
+            var pizzas = !string.IsNullOrEmpty(carritoJson) ? JsonConvert.DeserializeObject<List<CarritoItem>>(carritoJson) : new List<CarritoItem>();
+            var extras = !string.IsNullOrEmpty(carritoExtrasJson) ? JsonConvert.DeserializeObject<List<CarritoExtraViewModel>>(carritoExtrasJson) : new List<CarritoExtraViewModel>();
+
+            var viewModel = new CarritoViewModel
+            {
+                Pizzas = pizzas,
+                Extras = extras,
+                TotalGeneral = pizzas.Sum(p => p.PrecioFinal * p.Cantidad) + extras.Sum(e => e.Subtotal),
+                ExtrasDisponibles = await _context.ProductoExtras.Where(p => p.CantidadEnStock > 0).ToListAsync()
+            };
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        public IActionResult QuitarPizza(Guid id)
+        {
+            var carritoJson = HttpContext.Session.GetString("Carrito");
+            if (!string.IsNullOrEmpty(carritoJson))
+            {
+                var carrito = JsonConvert.DeserializeObject<List<CarritoItem>>(carritoJson);
+                var itemParaQuitar = carrito.FirstOrDefault(i => i.Id == id);
+                if (itemParaQuitar != null)
+                {
+                    carrito.Remove(itemParaQuitar);
+                    HttpContext.Session.SetString("Carrito", JsonConvert.SerializeObject(carrito));
+                }
+            }
+            return RedirectToAction("Carrito");
+        }
+
+        [HttpPost]
+        public IActionResult AgregarExtra(int productoExtraId, int cantidad = 1)
+        {
+            var producto = _context.ProductoExtras.Find(productoExtraId);
+            if (producto == null) return RedirectToAction("Carrito");
+
+            var carritoExtrasJson = HttpContext.Session.GetString("CarritoExtras");
+            var carritoExtras = string.IsNullOrEmpty(carritoExtrasJson) ? new List<CarritoExtraViewModel>() : JsonConvert.DeserializeObject<List<CarritoExtraViewModel>>(carritoExtrasJson);
+
             var itemExistente = carritoExtras.FirstOrDefault(i => i.ProductoExtraId == productoExtraId);
             if (itemExistente != null)
             {
-                // Si ya existe, solo aumentamos la cantidad.
                 itemExistente.Cantidad += cantidad;
             }
             else
             {
-                // Si es nuevo, lo añadimos a la lista.
                 carritoExtras.Add(new CarritoExtraViewModel
                 {
                     ProductoExtraId = producto.Id,
@@ -90,11 +159,25 @@ namespace PizzeriaOnline.Controllers
                 });
             }
 
-            // Guardamos la Lista actualizada de vuelta en la sesión.
             HttpContext.Session.SetString("CarritoExtras", JsonConvert.SerializeObject(carritoExtras));
+            return RedirectToAction("Carrito");
+        }
 
-            // Redirigimos de vuelta a la página de checkout
-            return RedirectToAction("Checkout");
+        [HttpPost]
+        public IActionResult QuitarExtra(int productoExtraId)
+        {
+            var carritoExtrasJson = HttpContext.Session.GetString("CarritoExtras");
+            if (!string.IsNullOrEmpty(carritoExtrasJson))
+            {
+                var carritoExtras = JsonConvert.DeserializeObject<List<CarritoExtraViewModel>>(carritoExtrasJson);
+                var itemParaQuitar = carritoExtras.FirstOrDefault(i => i.ProductoExtraId == productoExtraId);
+                if (itemParaQuitar != null)
+                {
+                    carritoExtras.Remove(itemParaQuitar);
+                    HttpContext.Session.SetString("CarritoExtras", JsonConvert.SerializeObject(carritoExtras));
+                }
+            }
+            return RedirectToAction("Carrito");
         }
 
         public async Task<IActionResult> Checkout()
@@ -124,98 +207,13 @@ namespace PizzeriaOnline.Controllers
         public IActionResult Contacto()
         {
             return View();
-        }
-
-        public IActionResult Index()
-        {
-            var listaDePizzas = _context.Pizzas.ToList();
-            return View(listaDePizzas);
-        }
-
-        public IActionResult Constructor()
-        {
-            var viewModel = new ConstructorViewModel
-            {
-                TamañosDisponibles = _context.Tamaños.ToList().OrderBy(t => t.PrecioBase).ToList(),
-                SaboresDisponibles = _context.Pizzas.OrderBy(p => p.Nombre).ToList()
-            };
-            return View(viewModel);
-        }
-
-        public IActionResult Carrito()
-        {
-            var carritoJson = HttpContext.Session.GetString("Carrito");
-            List<CarritoItem> carrito;
-            if (carritoJson == null)
-            {
-                carrito = new List<CarritoItem>();
-            }
-            else
-            {
-                carrito = JsonConvert.DeserializeObject<List<CarritoItem>>(carritoJson);
-            }
-            return View(carrito);
-        }      
+        }                      
 
         public IActionResult PedidoConfirmado(int id)
         {
             ViewBag.PedidoId = id;
             return View();
-        }
-
-        [HttpPost]
-        public IActionResult AgregarAlCarrito(int tamañoId, List<int> saboresIds)
-        {
-            if (saboresIds == null || !saboresIds.Any())
-            {
-                return RedirectToAction("Constructor");
-            }
-            var tamañoSeleccionado = _context.Tamaños.Find(tamañoId);
-            var saboresSeleccionados = _context.Pizzas.Where(p => saboresIds.Contains(p.Id)).ToList();
-            if (tamañoSeleccionado == null || !saboresSeleccionados.Any())
-            {
-                return NotFound();
-            }
-
-            var nuevoItem = new CarritoItem
-            {
-                TamañoId = tamañoId,
-                NombreTamaño = tamañoSeleccionado.Nombre,
-                PrecioFinal = tamañoSeleccionado.PrecioBase,
-                NombresSabores = saboresSeleccionados.Select(p => p.Nombre).ToList(),
-                Cantidad = 1
-            };
-
-            var carritoJson = HttpContext.Session.GetString("Carrito");
-            List<CarritoItem> carrito = carritoJson == null
-                ? new List<CarritoItem>()
-                : JsonConvert.DeserializeObject<List<CarritoItem>>(carritoJson);
-
-            carrito.Add(nuevoItem);
-            HttpContext.Session.SetString("Carrito", JsonConvert.SerializeObject(carrito));
-
-            return RedirectToAction("Carrito");
-        }
-
-        [HttpPost]
-        public IActionResult QuitarDelCarrito(Guid id)
-        {
-            var carritoJson = HttpContext.Session.GetString("Carrito");
-
-            if (carritoJson != null)
-            {
-                var carrito = JsonConvert.DeserializeObject<List<CarritoItem>>(carritoJson);
-                var itemParaQuitar = carrito.FirstOrDefault(i => i.Id == id);
-
-                if (itemParaQuitar != null)
-                {
-                    carrito.Remove(itemParaQuitar);
-                    HttpContext.Session.SetString("Carrito", JsonConvert.SerializeObject(carrito));
-                }
-            }
-
-            return RedirectToAction("Carrito");
-        }
+        }      
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
@@ -227,27 +225,15 @@ namespace PizzeriaOnline.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> FinalizarPedido(CheckoutViewModel checkoutModel)
         {
-            // Recargamos los carritos desde la sesión para trabajar con datos fiables
             var carritoJson = HttpContext.Session.GetString("Carrito");
             var carritoExtrasJson = HttpContext.Session.GetString("CarritoExtras");
             var carrito = !string.IsNullOrEmpty(carritoJson) ? JsonConvert.DeserializeObject<List<CarritoItem>>(carritoJson) : new List<CarritoItem>();
             var carritoExtras = !string.IsNullOrEmpty(carritoExtrasJson) ? JsonConvert.DeserializeObject<List<CarritoExtraViewModel>>(carritoExtrasJson) : new List<CarritoExtraViewModel>();
 
-            if (!carrito.Any() && !carritoExtras.Any())
-            {
-                ModelState.AddModelError("", "Tu carrito está vacío.");
-            }
-
-            // Validación de zona de reparto
-            const double minLat = 18.83, maxLat = 18.99, minLng = -99.62, maxLng = -99.55;
-            if (checkoutModel.Latitud < minLat || checkoutModel.Latitud > maxLat || checkoutModel.Longitud < minLng || checkoutModel.Longitud > maxLng)
-            {
-                ModelState.AddModelError("", "Lo sentimos, tu ubicación está fuera de nuestra zona de reparto.");
-            }
+            ValidarPedido(checkoutModel, carrito, carritoExtras);
 
             if (!ModelState.IsValid)
             {
-                // Si hay cualquier error, reconstruimos el ViewModel y volvemos a la vista
                 checkoutModel.Carrito = carrito;
                 checkoutModel.CarritoExtras = carritoExtras;
                 checkoutModel.TotalCarrito = carrito.Sum(i => i.PrecioFinal * i.Cantidad) + carritoExtras.Sum(e => e.Subtotal);
@@ -255,15 +241,42 @@ namespace PizzeriaOnline.Controllers
                 return View("Checkout", checkoutModel);
             }
 
-            // --- SI TODO ES VÁLIDO, PROCEDEMOS ---
+            var nuevoPedido = await CrearPedidoDesdeSesion(checkoutModel, carrito, carritoExtras);
 
+            _context.Pedidos.Add(nuevoPedido);
+            await _context.SaveChangesAsync();
+
+            HttpContext.Session.Remove("Carrito");
+            HttpContext.Session.Remove("CarritoExtras");
+
+            return RedirectToAction("PedidoConfirmado", new { id = nuevoPedido.Id });
+        }
+
+        // --- MÉTODOS PRIVADOS AUXILIARES ---
+
+        private void ValidarPedido(CheckoutViewModel checkoutModel, List<CarritoItem> carrito, List<CarritoExtraViewModel> carritoExtras)
+        {
+            if (!carrito.Any() && !carritoExtras.Any())
+            {
+                ModelState.AddModelError("", "Tu carrito está vacío. No puedes finalizar el pedido.");
+            }
+
+            const double minLat = 18.83, maxLat = 18.99, minLng = -99.62, maxLng = -99.55;
+            if (checkoutModel.Latitud < minLat || checkoutModel.Latitud > maxLat || checkoutModel.Longitud < minLng || checkoutModel.Longitud > maxLng)
+            {
+                ModelState.AddModelError("DireccionEntrega", "Lo sentimos, tu ubicación está fuera de nuestra zona de reparto.");
+            }
+        }
+
+        private async Task<Pedido> CrearPedidoDesdeSesion(CheckoutViewModel checkoutModel, List<CarritoItem> carrito, List<CarritoExtraViewModel> carritoExtras)
+        {
             var nuevoPedido = new Pedido
             {
                 FechaPedido = DateTime.Now,
                 NombreCliente = checkoutModel.NombreCliente,
                 DireccionEntrega = checkoutModel.DireccionEntrega,
                 Telefono = checkoutModel.Telefono,
-                Estado = "Pendiente de Pago", // Cambiado para el flujo de pago
+                Estado = "Recibido",
                 MetodoPago = checkoutModel.MetodoPago,
                 Latitud = checkoutModel.Latitud,
                 Longitud = checkoutModel.Longitud,
@@ -272,15 +285,15 @@ namespace PizzeriaOnline.Controllers
 
             decimal totalCalculado = 0;
 
-            // Procesar Pizzas
             foreach (var item in carrito)
             {
-                var nuevoDetalle = new DetallePedido
+                var detallePizza = new DetallePedido
                 {
                     Cantidad = item.Cantidad,
                     PrecioUnitario = item.PrecioFinal,
                     NombreTamaño = item.NombreTamaño,
-                    TamañoId = item.TamañoId
+                    TamañoId = item.TamañoId,
+                    DetalleSabores = new List<DetalleSabor>()
                 };
 
                 var pizzasDeEsteItem = await _context.Pizzas
@@ -289,51 +302,28 @@ namespace PizzeriaOnline.Controllers
 
                 foreach (var pizzaSabor in pizzasDeEsteItem)
                 {
-                    nuevoDetalle.DetalleSabores.Add(new DetalleSabor { PizzaId = pizzaSabor.Id });
+                    detallePizza.DetalleSabores.Add(new DetalleSabor { PizzaId = pizzaSabor.Id });
                 }
-                nuevoPedido.Detalles.Add(nuevoDetalle);
-                totalCalculado += nuevoDetalle.PrecioUnitario * nuevoDetalle.Cantidad;
+
+                nuevoPedido.Detalles.Add(detallePizza);
+                totalCalculado += detallePizza.PrecioUnitario * detallePizza.Cantidad;
             }
 
-            // Procesar Extras
             foreach (var extra in carritoExtras)
             {
-                nuevoPedido.Detalles.Add(new DetallePedido
+                var detalleExtra = new DetallePedido
                 {
                     Cantidad = extra.Cantidad,
                     PrecioUnitario = extra.PrecioUnitario,
-                    NombreTamaño = extra.Nombre
-                });
-                totalCalculado += extra.PrecioUnitario * extra.Cantidad;
+                    NombreTamaño = extra.Nombre,
+                    ProductoExtraId = extra.ProductoExtraId
+                };
+                nuevoPedido.Detalles.Add(detalleExtra);
+                totalCalculado += detalleExtra.PrecioUnitario * extra.Cantidad;
             }
 
             nuevoPedido.TotalPedido = totalCalculado;
-
-            nuevoPedido.MetodoPago = checkoutModel.MetodoPago;
-
-            // Decidimos a dónde redirigir según el método de pago
-            if (checkoutModel.MetodoPago == "Tarjeta")
-            {
-                nuevoPedido.Estado = "Pendiente de Pago";
-                _context.Pedidos.Add(nuevoPedido);
-                await _context.SaveChangesAsync();
-
-                HttpContext.Session.Remove("Carrito");
-                HttpContext.Session.Remove("CarritoExtras");
-
-                return RedirectToAction("CrearCheckoutSession", "Pago", new { pedidoId = nuevoPedido.Id });
-            }
-            else // Efectivo
-            {
-                nuevoPedido.Estado = "Recibido";
-                _context.Pedidos.Add(nuevoPedido);
-                await _context.SaveChangesAsync();
-
-                HttpContext.Session.Remove("Carrito");
-                HttpContext.Session.Remove("CarritoExtras");
-
-                return RedirectToAction("PedidoConfirmado", new { id = nuevoPedido.Id });
-            }
+            return nuevoPedido;
         }
     }
 }

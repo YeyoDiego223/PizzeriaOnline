@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PizzeriaOnline.Data;
 
@@ -10,9 +11,11 @@ using PizzeriaOnline.Data;
 namespace PizzeriaOnline.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250828022918_AgregarProductoExtraIdDetallePedido")]
+    partial class AgregarProductoExtraIdDetallePedido
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.5");
@@ -235,12 +238,14 @@ namespace PizzeriaOnline.Migrations
                     b.Property<int?>("ProductoExtraId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("TamañoId")
+                    b.Property<int>("TamañoId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
                     b.HasIndex("PedidoId");
+
+                    b.HasIndex("ProductoExtraId");
 
                     b.ToTable("DetallePedidos");
                 });
@@ -613,7 +618,13 @@ namespace PizzeriaOnline.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("PizzeriaOnline.Models.ProductoExtra", "ProductoExtra")
+                        .WithMany()
+                        .HasForeignKey("ProductoExtraId");
+
                     b.Navigation("Pedido");
+
+                    b.Navigation("ProductoExtra");
                 });
 
             modelBuilder.Entity("PizzeriaOnline.Models.DetalleSabor", b =>

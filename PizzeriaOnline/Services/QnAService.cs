@@ -35,7 +35,7 @@ namespace PizzeriaOnline.Services
                     }
                 }
 
-                return "Lo siento, no he podido encontrar una respuesta a tu pregunta. Intenta reformularla.";
+                return "Vaya, esa es una pregunta muy específica. Para darte la mejor atención, por favor contáctanos directamente por WhatsApp y uno de nuestros expertos te atenderá. Diriguete a la sección de Contacto";
             }
             catch (Exception ex)
             {

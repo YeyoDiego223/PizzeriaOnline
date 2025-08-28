@@ -3,14 +3,18 @@ using System.Collections.Generic;
 
 namespace PizzeriaOnline.ViewModels
 {
-    public class ConstructorViewModel
+    public class SaborSeleccionado
     {
+        public int PizzaId { get; set; }
+        public decimal Porcion { get; set; }
+    }
+
+    public class ConstructorViewModel
+    {        
+
         public List<Tamaño> TamañosDisponibles {  get; set; }
         public List<Pizza> SaboresDisponibles { get; set; }
-        public  ConstructorViewModel() 
-        {
-            TamañosDisponibles = new List<Tamaño>();
-            SaboresDisponibles = new List<Pizza>();
-        }
+        public int TamañoId { get; set; }
+        public List<SaborSeleccionado> Sabores { get; set; } = new();        
     }
 }

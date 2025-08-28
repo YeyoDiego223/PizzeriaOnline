@@ -9,5 +9,6 @@ namespace PizzeriaOnline.ViewModels
         public List<CarritoItem> Pizzas { get; set; } = new();
         public List<CarritoExtraViewModel> Extras { get; set; } = new();
         public decimal TotalGeneral { get; set; }
+        public List<ProductoExtra> ExtrasDisponibles { get; set; } = new();
     }
 }
