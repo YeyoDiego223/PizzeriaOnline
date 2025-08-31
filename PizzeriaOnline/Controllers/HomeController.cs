@@ -22,11 +22,13 @@ namespace PizzeriaOnline.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<HomeController> _logger;
+        private readonly IConfiguration _configuration;
 
-        public HomeController(ApplicationDbContext context, IWebHostEnvironment hostEnvironment, ILogger<HomeController> logger)
+        public HomeController(ApplicationDbContext context, IWebHostEnvironment hostEnvironment, ILogger<HomeController> logger, IConfiguration configuration)
         {
             _context = context;
             _logger = logger;
+            _configuration = configuration;
         }
 
         public IActionResult Index()
@@ -197,6 +199,8 @@ namespace PizzeriaOnline.Controllers
         {           
             var carritoJson = HttpContext.Session.GetString("Carrito");
             var carritoExtrasJson = HttpContext.Session.GetString("CarritoExtras");
+            var googleApiKey = _configuration["Google:ApiKey"];
+            ViewData["GoogleApiKey"] = googleApiKey;
 
             var carrito = !string.IsNullOrEmpty(carritoJson)
                 ? JsonConvert.DeserializeObject<List<CarritoItem>>(carritoJson)
