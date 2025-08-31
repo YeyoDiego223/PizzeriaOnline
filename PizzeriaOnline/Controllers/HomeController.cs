@@ -31,8 +31,21 @@ namespace PizzeriaOnline.Controllers
 
         public IActionResult Index()
         {
+            var listaDePromociones = _context.Promociones
+                .Where(p => p.EstaActiva)
+                .ToList();
+
             var listaDePizzas = _context.Pizzas.ToList();
-            return View(listaDePizzas);
+
+            var viewModel = new HomeIndexViewModel
+            {
+                PizzasDisponibles = listaDePizzas,
+                PromocionesActivas = listaDePromociones
+            };
+
+            return View(viewModel);
+
+            
         }
 
         public IActionResult Constructor()

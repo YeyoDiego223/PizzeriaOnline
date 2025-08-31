@@ -1,7 +1,26 @@
-﻿    @model IEnumerable<PizzeriaOnline.Models.Pizza>
+﻿    @model PizzeriaOnline.ViewModels.HomeIndexViewModel
     @{
         ViewData["Title"] = "Nuestro Menú";
     }
+
+@* --- NUEVO MODAL DE PROMOCIONES --- *@
+@if (Model.PromocionesActivas.Any())
+{
+    // Tomamos solo la primera promoción activa para mostrarla en el modal
+    var promocionPrincipal = Model.PromocionesActivas.First();
+
+    <div class="modal fade" id="promoModal" tabindex="-1" aria-labelledby="promoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content bg-transparent border-0">
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button> @* <-- MUÉVELO AQUÍ *@
+                <div class="modal-body p-0">
+                    @* <-- Quita 'position-relative' de aquí *@
+                    <img src="@promocionPrincipal.RutaImagen" class="img-fluid rounded" alt="@promocionPrincipal.Titulo" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
     <div class="text-center">
         <h1 class="display-4">Nuestro Menú de Pizzas</h1>
@@ -9,7 +28,7 @@
     </div>
 
     <div class="row mt-4">
-        @foreach (var pizza in Model)
+        @foreach (var pizza in Model.PizzasDisponibles)
         {
             <div class="col-md-6 col-lg-4 mb-4">
                 <div class="card h-100">
@@ -28,3 +47,17 @@
             </div>
         }
     </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const promoModalElement = document.getElementById('promoModal');
+
+            // Si hay un modal en la página, lo mostramos.
+            if (promoModalElement) {
+                var miModal = new bootstrap.Modal(promoModalElement);
+                miModal.show();
+            }
+        });
+    </script>
+}

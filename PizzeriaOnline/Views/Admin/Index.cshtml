@@ -39,14 +39,28 @@
 				<h5 class="card-title">Inventario Bajo</h5>
 				@{
 					var ingredientesBajos = ViewData["IngredientesBajos"] as List<Ingrediente>;
-					if (ingredientesBajos != null && ingredientesBajos.Any())
+					var productosExtraBajos = ViewData["ProductosExtraBajos"] as List<ProductoExtra>;
+
+					bool hayIngredientesBajos = ingredientesBajos != null && ingredientesBajos.Any();
+					bool hayProductosBajos = productosExtraBajos != null && productosExtraBajos.Any();
+
+					if (hayIngredientesBajos || hayProductosBajos)
 					{
 						<ul class="list-unstyled mb-0 small">
-						@foreach(var ingrediente in ingredientesBajos)
+						@if (hayIngredientesBajos)
 						{
-							<li>- @ingrediente.Nombre (@ingrediente.CantidadEnStock @ingrediente.UnidadDeMedida)</li>		
-						
+							@foreach (var ingrediente in ingredientesBajos)
+							{
+								<li>- @ingrediente.Nombre (@ingrediente.CantidadEnStock @ingrediente.UnidadDeMedida)</li>
+							}
 						}
+						@if (hayProductosBajos)
+						{
+							foreach (var producto in productosExtraBajos)
+							{
+								<li>- @producto.Nombre (Quedan: @producto.CantidadEnStock)</li>
+							}
+						}																									
 						</ul>
 					}
 					else
@@ -113,6 +127,9 @@
 	<a asp-controller="ProductosExtra" asp-action="Index" class="btn btn-info">
 		Gestionar Productos Extra
 	</a>
+	<a asp-controller="Promociones" asp-action="Index" class="btn btn-info">
+		Gestionar Promociones
+	</a>
 </div>
 @if (!Model.Any())
 {
@@ -175,3 +192,4 @@ else
 		</tbody>
 	</table>
 }
+

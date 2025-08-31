@@ -22,6 +22,6 @@ namespace PizzeriaOnline.ViewModels
         public string? RutaImagenExistente { get; set; }
         
         // Para recibir la nueva imagen (es opcional al editar)
-        public IFormFile ImagenArchivo {  get; set; }
+        public IFormFile? ImagenArchivo {  get; set; }
     }
 }

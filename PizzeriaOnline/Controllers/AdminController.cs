@@ -78,6 +78,13 @@ namespace PizzeriaOnline.Controllers
             // Guardamos la lista completa en ViewData.
             ViewData["IngredientesBajos"] = ingredientesBajos;
 
+            const int umbralBajoExtras = 5;
+            var productosExtraBajos = _context.ProductoExtras
+                .Where(p => p.CantidadEnStock < umbralBajoExtras)
+                .ToList();
+
+            ViewData["ProductosExtraBajos"] = productosExtraBajos;
+
             var pizzasPopulares = _context.DetalleSabores
                 .Include(ds => ds.Pizza)
                 .GroupBy(ds => ds.Pizza.Nombre) // Agrupamos por el nombre de la pizza

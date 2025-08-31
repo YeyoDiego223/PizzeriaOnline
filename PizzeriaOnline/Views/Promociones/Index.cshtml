@@ -1,0 +1,60 @@
+﻿@model IEnumerable<PizzeriaOnline.Models.Promocion>
+@{
+	ViewData["Title"] = "Administración de Promociones";
+}
+<a asp-action="Index" asp-controller="Admin" class="btn btn-secondary mb-3">
+	<i class="bi bi-arrow-left"></i> Regresar el Adminsitrador
+</a>
+<hr />
+
+<h1>@ViewData["Title"]</h1>
+
+<p>
+	<a asp-action="Create" class="btn btn-primary">Crear nueva Promoción</a>
+</p>
+
+<table class="table table-striped">
+	<thead>
+		<tr>
+			<th>Titulo</th>
+			<th>Descripcion</th>
+			<th>Precio</th>
+			<th>Imagen</th>
+			<th>Esta Activa</th>
+			<th>Acciones</th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var promocion in Model)
+		{
+			<tr>
+				<td>
+					@Html.DisplayFor(modelItem => promocion.Titulo)
+				</td>
+				<td>
+					@Html.DisplayFor(modelItem => promocion.Descripcion)
+				</td>>
+				<td>
+					@Html.DisplayFor(modelItem => promocion.Precio)
+				</td>
+				<td>
+					<img src="@promocion.RutaImagen" alt="Imagen de @promocion.Titulo" style="width: 100px; height: auto; border-radius: 5px;" />
+				</td>
+				<td>
+					@if (promocion.EstaActiva)
+					{
+						<span class="badge bg-success">Activa</span>
+					}
+					else
+					{
+						<span class="badge bg-secondary">Inactiva</span>
+					}
+				</td>
+				<td>
+					<a asp-action="Edit" asp-route-id="@promocion.Id" class="btn btn-warning btn-sm">Editar</a>
+					<a asp-action="Delete" asp-route-id="@promocion.Id" class="btn btn-danger btn-sm">Eliminar</a>
+				</td>
+			</tr>
+		}
+	</tbody>
+</table>
