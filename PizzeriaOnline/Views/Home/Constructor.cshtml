@@ -33,7 +33,14 @@
                 {
                     <div class="col-md-4 mb-3">
                         <div class="card h-100">
-                            <img src="@sabor.RutaImagen" class="card-img-top" alt="@sabor.Nombre" style="height: 150px; object-fit: cover;">
+                            @if (sabor.Imagenes != null && sabor.Imagenes.Any())
+                            {
+                                <img src="@sabor.Imagenes.First().RutaImagen" class="card-img-top" alt="@sabor.Nombre" style="height: 150px; object-fit: cover;" />
+                            }
+                            else
+                            {
+                                <img src="/images/placeholder.jpg" class="card-img-top" alt="Imagen no disponible" style="height: 150px; object-fit: cover;" />
+                            }
                             <div class="card-body">
                                 <div class="form-check">
                                     <input class="form-check-input sabor-checkbox" type="checkbox" name="saboresIds" value="@sabor.Id" id="sabor-@sabor.Id">

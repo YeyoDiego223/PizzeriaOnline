@@ -37,7 +37,9 @@ namespace PizzeriaOnline.Controllers
                 .Where(p => p.EstaActiva)
                 .ToList();
 
-            var listaDePizzas = _context.Pizzas.ToList();
+            var listaDePizzas = _context.Pizzas
+                .Include(p => p.Imagenes)
+                .ToList();
 
             var viewModel = new HomeIndexViewModel
             {
@@ -56,7 +58,10 @@ namespace PizzeriaOnline.Controllers
             {
                 // Primero trae los datos con ToList(), LUEGO ordena con OrderBy()
                 TamañosDisponibles = _context.Tamaños.ToList().OrderBy(t => t.PrecioBase).ToList(),
-                SaboresDisponibles = _context.Pizzas.OrderBy(p => p.Nombre).ToList()
+                SaboresDisponibles = _context.Pizzas
+                                        .Include(p => p.Imagenes)
+                                        .OrderBy(p => p.Nombre)
+                                        .ToList()
             };
             return View(viewModel);
         }

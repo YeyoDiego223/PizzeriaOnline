@@ -27,7 +27,14 @@
 		{
 			<tr>
 				<td>
-					<img src="@pizza.RutaImagen" alt="Imagen de @pizza.Nombre" style="width: 100px; height: auto; border-radius: 5px;"/>
+					@if (pizza.Imagenes != null && pizza.Imagenes.Any())
+					{
+						<img src="@(pizza.Imagenes.OrderByDescending(i => i.EsImagenPrincipal).First().RutaImagen)" alt="Imagen de @pizza.Nombre" style="width: 100px; height: auto; border-radius: 5px;" />
+					}
+					else
+					{
+						<img src="/images/placeholder.jpg" alt="Sin imagen" style="width: 100px; height: auto; border-radius: 5px;" />
+					}
 				</td>
 				<td>
 					@Html.DisplayFor(modelItem => pizza.Nombre)

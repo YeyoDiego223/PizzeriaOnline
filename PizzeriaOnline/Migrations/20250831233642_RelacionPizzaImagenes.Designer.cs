@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PizzeriaOnline.Data;
 
@@ -10,9 +11,11 @@ using PizzeriaOnline.Data;
 namespace PizzeriaOnline.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250831233642_RelacionPizzaImagenes")]
+    partial class RelacionPizzaImagenes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.5");
@@ -428,9 +431,6 @@ namespace PizzeriaOnline.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("EsImagenPrincipal")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("PizzaId")
                         .HasColumnType("INTEGER");
 
@@ -448,56 +448,48 @@ namespace PizzeriaOnline.Migrations
                         new
                         {
                             Id = 1,
-                            EsImagenPrincipal = false,
                             PizzaId = 1,
                             RutaImagen = "/images/pizzas/monumental.jpg"
                         },
                         new
                         {
                             Id = 2,
-                            EsImagenPrincipal = false,
                             PizzaId = 2,
                             RutaImagen = "/images/pizzas/macarena.jpg"
                         },
                         new
                         {
                             Id = 3,
-                            EsImagenPrincipal = false,
                             PizzaId = 3,
                             RutaImagen = "/images/pizzas/sevillana.jpg"
                         },
                         new
                         {
                             Id = 4,
-                            EsImagenPrincipal = false,
                             PizzaId = 4,
                             RutaImagen = "/images/pizzas/manoletina.jpg"
                         },
                         new
                         {
                             Id = 5,
-                            EsImagenPrincipal = false,
                             PizzaId = 5,
                             RutaImagen = "/images/pizzas/miura.jpg"
                         },
                         new
                         {
                             Id = 6,
-                            EsImagenPrincipal = false,
                             PizzaId = 6,
                             RutaImagen = "/images/pizzas/zapopina.jpg"
                         },
                         new
                         {
                             Id = 7,
-                            EsImagenPrincipal = false,
                             PizzaId = 7,
                             RutaImagen = "/images/pizzas/chicuelina.jpg"
                         },
                         new
                         {
                             Id = 8,
-                            EsImagenPrincipal = false,
                             PizzaId = 8,
                             RutaImagen = "/images/pizzas/san_fermin.jpg"
                         });

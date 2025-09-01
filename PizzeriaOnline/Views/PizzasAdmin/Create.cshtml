@@ -5,7 +5,7 @@
 }
 
 <h1>@ViewData["Title"]</h1>
-<h4>Pizza</h4>
+<h4>Pizza del Menú</h4>
 <hr />
 <div class="row">
 	<div class="col-md-6">
@@ -23,9 +23,9 @@
 				<span asp-validation-for="Descripcion" class="text-danger"></span>
 			</div>
 			<div class="mb-3">
-				<label asp-for="ImagenArchivo" class="form-label">Imagen de la Pizza</label>	
-				<input asp-for="ImagenArchivo" class="form-control" type="file" />
-				<span asp-validation-for="ImagenArchivo" class="text-danger"></span>
+				<label asp-for="ImagenesArchivo" class="form-label"></label>
+				<input asp-for="ImagenesArchivo" class="form-control" type="file" multiple />
+				<span asp-validation-for="ImagenesArchivo" class="text-danger"></span>
 			</div>
 
 			<div class="mt-4">

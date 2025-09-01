@@ -19,63 +19,68 @@ namespace PizzeriaOnline.Data
 
                 );
 
+            // PASO 1: Crea las pizzas SIN la propiedad de imagen
             modelBuilder.Entity<Pizza>().HasData(
-            new Pizza
-            {
-                Id = 1,
-                Nombre = "Monumental",
-                Descripcion = "Masa maestra, salsa secreta, aceitunas negras, morrón, elote, cebolla morada, pepperoni, piña, champiñones, romero, mozzarella",
-                RutaImagen = "/images/pizzas/monumental.jpg" // Asumimos que tendremos esta imagen más tarde
-            },
-            new Pizza
-            {
-                Id = 2,
-                Nombre = "Macarena",
-                Descripcion = "Masa maestra, salsa secreta, queso mozzarella, albhaca fresca.",
-                RutaImagen = "/images/pizzas/macarena.jpg"
-            },
-            new Pizza
-            {
-                Id = 3,
-                Nombre = "Sevillana",
-                Descripcion = "Masa maestra, salsa secreta, piña, jamón, mozzarella",
-                RutaImagen = "/images/pizzas/sevillana.jpg"
-            },
-            new Pizza
-            {
-                Id = 4,
-                Nombre = "Manoletina",
-                Descripcion = "Masa maestra, salsa secreta, pepperoni , mozzarella",
-                RutaImagen = "/images/pizzas/manoletina.jpg"
-            },
-            new Pizza
-            {
-                Id = 5,
-                Nombre = "Miura",
-                Descripcion = "Masa maestra, salsa secreta, frijoles, elote, morrón, tocino, chorizo, rodajas de serrano",
-                RutaImagen = "/images/pizzas/miura.jpg"
-            },
-            new Pizza
-            {
-                Id = 6,
-                Nombre = "Zapopina",
-                Descripcion = "Masa maestra salsa secreta, carne de alambre, mozzarella",
-                RutaImagen = "/images/pizzas/zapopina.jpg"
-            },
-            new Pizza
-            {
-                Id = 7,
-                Nombre = "Chicuelina",
-                Descripcion = "Masa maestra, salsa secreta, queso chihuaha, queso monterrey jack, queso cheddar, queso asadero, queso mozzarela",
-                RutaImagen = "/images/pizzas/chicuelina.jpg"
-            },
-            new Pizza
-            {
-                Id = 8,
-                Nombre = "San Fermin",
-                Descripcion = "Masa maestra, salsa secreta, carne al pastor, mozzarella",
-                RutaImagen = "/images/pizzas/san_fermin.jpg"
-            }
+                new Pizza
+                {
+                    Id = 1,
+                    Nombre = "Monumental",
+                    Descripcion = "Masa maestra, salsa secreta, aceitunas negras, morrón, elote, cebolla morada, pepperoni, piña, champiñones, romero, mozzarella"
+                },
+                new Pizza
+                {
+                    Id = 2,
+                    Nombre = "Macarena",
+                    Descripcion = "Masa maestra, salsa secreta, queso mozzarella, albhaca fresca."
+                },
+                new Pizza
+                {
+                    Id = 3,
+                    Nombre = "Sevillana",
+                    Descripcion = "Masa maestra, salsa secreta, piña, jamón, mozzarella"
+                },
+                new Pizza
+                {
+                    Id = 4,
+                    Nombre = "Manoletina",
+                    Descripcion = "Masa maestra, salsa secreta, pepperoni , mozzarella"
+                },
+                new Pizza
+                {
+                    Id = 5,
+                    Nombre = "Miura",
+                    Descripcion = "Masa maestra, salsa secreta, frijoles, elote, morrón, tocino, chorizo, rodajas de serrano"
+                },
+                new Pizza
+                {
+                    Id = 6,
+                    Nombre = "Zapopina",
+                    Descripcion = "Masa maestra salsa secreta, carne de alambre, mozzarella"
+                },
+                new Pizza
+                {
+                    Id = 7,
+                    Nombre = "Chicuelina",
+                    Descripcion = "Masa maestra, salsa secreta, queso chihuaha, queso monterrey jack, queso cheddar, queso asadero, queso mozzarela"
+                },
+                new Pizza
+                {
+                    Id = 8,
+                    Nombre = "San Fermin",
+                    Descripcion = "Masa maestra, salsa secreta, carne al pastor, mozzarella"
+                }
+            );
+
+            // PASO 2: Crea las imágenes y CONÉCTALAS a las pizzas usando PizzaId
+            modelBuilder.Entity<PizzaImagen>().HasData(
+                new PizzaImagen { Id = 1, PizzaId = 1, RutaImagen = "/images/pizzas/monumental.jpg" },
+                new PizzaImagen { Id = 2, PizzaId = 2, RutaImagen = "/images/pizzas/macarena.jpg" },
+                new PizzaImagen { Id = 3, PizzaId = 3, RutaImagen = "/images/pizzas/sevillana.jpg" },
+                new PizzaImagen { Id = 4, PizzaId = 4, RutaImagen = "/images/pizzas/manoletina.jpg" },
+                new PizzaImagen { Id = 5, PizzaId = 5, RutaImagen = "/images/pizzas/miura.jpg" },
+                new PizzaImagen { Id = 6, PizzaId = 6, RutaImagen = "/images/pizzas/zapopina.jpg" },
+                new PizzaImagen { Id = 7, PizzaId = 7, RutaImagen = "/images/pizzas/chicuelina.jpg" },
+                new PizzaImagen { Id = 8, PizzaId = 8, RutaImagen = "/images/pizzas/san_fermin.jpg" }
             );
 
             modelBuilder.Entity<Receta>()
@@ -116,6 +121,7 @@ namespace PizzeriaOnline.Data
 
         public DbSet<MensajeChat> MensajesChat { get; set; }
         public DbSet<Promocion> Promociones { get; set; }
+        public DbSet<PizzaImagen> PizzaImagenes { get; set; }
     }
 
 }

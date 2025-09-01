@@ -3,18 +3,15 @@
         ViewData["Title"] = "Nuestro Menú";
     }
 
-@* --- NUEVO MODAL DE PROMOCIONES --- *@
+@* --- MODAL DE PROMOCIONES --- *@
 @if (Model.PromocionesActivas.Any())
 {
-    // Tomamos solo la primera promoción activa para mostrarla en el modal
     var promocionPrincipal = Model.PromocionesActivas.First();
-
     <div class="modal fade" id="promoModal" tabindex="-1" aria-labelledby="promoModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-xl">
             <div class="modal-content bg-transparent border-0">
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button> @* <-- MUÉVELO AQUÍ *@
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 <div class="modal-body p-0">
-                    @* <-- Quita 'position-relative' de aquí *@
                     <img src="@promocionPrincipal.RutaImagen" class="img-fluid rounded" alt="@promocionPrincipal.Titulo" />
                 </div>
             </div>
@@ -22,41 +19,170 @@
     </div>
 }
 
-    <div class="text-center">
-        <h1 class="display-4">Nuestro Menú de Pizzas</h1>
-        <p>¡Elige tu pizza favorita y pídela ahora!</p>
-    </div>
+<div class="text-center">
+    <h1 class="display-4">Nuestro Menú de Pizzas</h1>
+    <p>¡Elige tu pizza favorita y pídela ahora!</p>
+</div>
 
-    <div class="row mt-4">
-        @foreach (var pizza in Model.PizzasDisponibles)
-        {
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100">
-                    <img src="@pizza.RutaImagen" class="card-img-top" alt="Imagen de @pizza.Nombre" style="height: 220px; object-fit: cover;">
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title">@pizza.Nombre</h5>
-                        <p class="card-text">@pizza.Descripcion</p>
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    @foreach (var pizza in Model.PizzasDisponibles)
+    {
+        <div class="col">
+            <div class="card h-100 shadow-sm">
 
-                        <div class="mt-auto">
-                            <a asp-controller="Home" asp-action="Constructor" class="btn btn-success">
-                                ¡Arma tu Pizza!
-                            </a>
+                @if (pizza.Imagenes != null && pizza.Imagenes.Any())
+                {
+                    <div id="carousel-@pizza.Id" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            @{
+                                var isFirst = true;
+                            }
+                            @foreach (var imagen in pizza.Imagenes.OrderByDescending(i => i.EsImagenPrincipal))
+                            {
+                                // Convertimos la lista de imágenes a un string JSON seguro para HTML
+                                var imagesJsonString = Json.Serialize(pizza.Imagenes.OrderByDescending(i => i.EsImagenPrincipal).Select(i => i.RutaImagen));
+
+                                <div class="carousel-item @(isFirst ? "active" : "")"
+                                     style="cursor: pointer;"
+                                     data-bs-toggle="modal"
+                                     data-bs-target="#pizzaDetailModal"
+                                     data-pizza-name="@pizza.Nombre"
+                                     data-pizza-description="@pizza.Descripcion"
+                                     data-pizza-images='@imagesJsonString'>
+                                    @* <-- CAMBIO CLAVE: Usamos comillas simples aquí *@
+
+                                    <img src="@imagen.RutaImagen" class="d-block w-100" alt="Imagen de @pizza.Nombre" style="height: 200px; object-fit: cover;">
+                                </div>
+                                isFirst = false;
+                            }
+                        </div>
+
+                        @if (pizza.Imagenes.Count > 1)
+                        {
+                            <button class="carousel-control-prev" type="button" data-bs-target="#carousel-@pizza.Id" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#carousel-@pizza.Id" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            </button>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <img src="/images/placeholder.jpg" class="card-img-top" alt="Imagen no disponible" style="height: 200px; object-fit: cover;">
+                }
+
+                <div class="card-body">
+                    <h5 class="card-title">@pizza.Nombre</h5>
+                    <p class="card-text">@pizza.Descripcion</p> @* <-- Corregido a Descripcion *@
+                </div>
+                <div class="card-footer">
+                    <a asp-action="Constructor" class="btn btn-success w-100">¡Arma tu Pizza!</a>
+                </div>
+            </div>
+        </div>
+    }    
+</div>
+
+@* --- MODAL ÚNICO PARA DETALLES DE PIZZA --- *@
+<div class="modal fade" id="pizzaDetailModal" tabindex="-1" aria-labelledby="pizzaDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="pizzaDetailModalLabel">Nombre de la Pizza</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        @* El carrusel se generará aquí con JavaScript *@
+                        <div id="pizzaDetailCarousel" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-indicators"></div>
+                            <div class="carousel-inner"></div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#pizzaDetailCarousel" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#pizzaDetailCarousel" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <h4>Descripción</h4>
+                        <p id="pizzaDetailDescription">Aquí va la descripción de la pizza.</p>
+                        <div class="d-grid">
+                            <a asp-action="Constructor" class="btn btn-success btn-lg">¡Arma esta Pizza!</a>
                         </div>
                     </div>
                 </div>
             </div>
-        }
+        </div>
     </div>
+</div>
 
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const promoModalElement = document.getElementById('promoModal');
 
-            // Si hay un modal en la página, lo mostramos.
+            // --- SCRIPT 1: LÓGICA PARA EL MODAL DE PROMOCIONES ---
+            const promoModalElement = document.getElementById('promoModal');
             if (promoModalElement) {
                 var miModal = new bootstrap.Modal(promoModalElement);
                 miModal.show();
+            }
+
+            // --- SCRIPT 2: LÓGICA PARA EL MODAL DE DETALLES DE PIZZA ---
+            const pizzaDetailModal = document.getElementById('pizzaDetailModal');
+            if (pizzaDetailModal) {
+                pizzaDetailModal.addEventListener('show.bs.modal', function (event) {
+                    const triggerElement = event.relatedTarget;
+                    if (!triggerElement) return; // Salida de seguridad
+
+                    // Leer los datos
+                    const pizzaName = triggerElement.dataset.pizzaName;
+                    const pizzaDescription = triggerElement.dataset.pizzaDescription;
+                    const pizzaImagesJson = triggerElement.dataset.pizzaImages;
+
+                    // Referencias a los elementos del modal
+                    const modalTitle = pizzaDetailModal.querySelector('.modal-title');
+                    const modalDescription = pizzaDetailModal.querySelector('#pizzaDetailDescription');
+                    const carouselIndicators = pizzaDetailModal.querySelector('.carousel-indicators');
+                    const carouselInner = pizzaDetailModal.querySelector('.carousel-inner');
+
+                    // Limpiar el contenido anterior
+                    carouselIndicators.innerHTML = '';
+                    carouselInner.innerHTML = '';
+
+                    // Poblar el modal con los nuevos datos
+                    modalTitle.textContent = pizzaName;
+                    modalDescription.textContent = pizzaDescription;
+
+                    // Salida de seguridad si las imágenes no se pueden leer
+                    if (!pizzaImagesJson) return;
+
+                    const pizzaImages = JSON.parse(pizzaImagesJson);
+
+                    // Construir dinámicamente el nuevo carrusel
+                    pizzaImages.forEach((imageUrl, index) => {
+                        const isActive = index === 0;
+
+                        // Crear indicador
+                        carouselIndicators.innerHTML += `
+                            <button type="button" data-bs-target="#pizzaDetailCarousel"
+                                    data-bs-slide-to="${index}"
+                                    class="${isActive ? 'active' : ''}"
+                                    aria-current="${isActive ? 'true' : 'false'}"></button>`;
+
+                        // Crear slide
+                        carouselInner.innerHTML += `
+                            <div class="carousel-item ${isActive ? 'active' : ''}">
+                                <img src="${imageUrl}" class="d-block w-100" alt="Imagen de ${pizzaName}">
+                            </div>`;
+                    });
+                });
             }
         });
     </script>
