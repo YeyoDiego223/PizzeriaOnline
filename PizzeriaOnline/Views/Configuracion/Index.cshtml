@@ -1,0 +1,39 @@
+﻿@model PizzeriaOnline.Models.Configuracion
+@{
+	ViewData["Title"] = "Configuración de la Tienda";
+}
+
+<h1>@ViewData["Title"]</h1>
+<p>Desde aquí puedes establecer los horarios de apertura y cerrar manualmente la tienda si es necesario.</p>
+<hr />
+
+<div class="row">
+	<div class="col-md-6">
+		<form asp-action="Index">
+			<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+			<input type="hidden" asp-for="Id" />
+
+			<div class="form-check form-switch mb-3 p-3 border rounded">
+				<input class="form-check-input" type="checkbox" role="switch" asp-for="ForzarCierre" />
+				<label class="form-check-label" asp-for="ForzarCierre"></label>
+				<div class="form-text">Si marcas esta opción, la tienda aparecera como "Cerrada" para los clientes, sin importar el horario.</div>
+			</div>
+
+			<div class="mb-3">
+				<label asp-for="HoraApertura" class="form-label"></label>
+				<input asp-for="HoraApertura" type="time" class="form-control" />
+				<span asp-validation-for="HoraApertura" class="text-danger"></span>
+			</div>
+
+			<div class="mb-3">
+				<label asp-for="HoraCierre" class="form-label"></label>
+				<input asp-for="HoraCierre" type="time" class="form-control" />
+				<span asp-validation-for="HoraCierre" class="text-danger"></span>
+			</div>
+
+			<div class="mt-4">
+				<button type="submit" class="btn btn-primary">Guardar Cambios</button>
+			</div>
+		</form>
+	</div>
+</div>

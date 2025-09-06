@@ -8,7 +8,7 @@ namespace PizzeriaOnline.Data
     {
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);            
+            base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<Tamaño>().HasData(
                 new Tamaño { Id = 1, Nombre = "Mediana", Dimensiones = "35cm", NumeroRebanadas = 6, PrecioBase = 150.00m, MaximoSabores = 1 },
@@ -100,13 +100,25 @@ namespace PizzeriaOnline.Data
                 .HasOne(ds => ds.Pizza)
                 .WithMany(p => p.DetalleSabores)
                 .HasForeignKey(ds => ds.PizzaId);
-        }      
 
-        
+            modelBuilder.Entity<Configuracion>().HasData(
+            new Configuracion
+            {
+                Id = 1,
+                ForzarCierre = false,
+                HoraApertura = new TimeSpan(14, 0, 0),
+                HoraCierre = new TimeSpan(22, 0, 0)
+            }
+        );
+        }
+
+
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
+
+        
 
         public DbSet<Pizza> Pizzas { get; set; }
         public DbSet<Ingrediente> Ingredientes { get; set; }
@@ -122,6 +134,8 @@ namespace PizzeriaOnline.Data
         public DbSet<MensajeChat> MensajesChat { get; set; }
         public DbSet<Promocion> Promociones { get; set; }
         public DbSet<PizzaImagen> PizzaImagenes { get; set; }
+
+        public DbSet<Configuracion> Configuracion { get; set; }
     }
 
 }
