@@ -367,6 +367,9 @@ namespace PizzeriaOnline.Controllers
                 return NotFound();
             }
 
+            var googleApiKey = _configuration["Google:ApiKey"];
+            ViewData["GoogleApiKey"] = googleApiKey;
+
             return View("PedidoConfirmado", pedido);
         }
 
@@ -399,6 +402,34 @@ namespace PizzeriaOnline.Controllers
                 estado = pedido.Estado,
                 token = pedido.AccesoToken
             });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ActualizarDatosPedido(int id, string nombreCliente, string telefono, string direccionEntrega, double latitud, double longitud)
+        {
+            var pedido = await _context.Pedidos.FindAsync(id);
+
+            if (pedido == null)
+            {
+                return NotFound();
+            }
+
+            // Doble checo de seguridad: solo se puede modificar si el estado es "Recibido"
+            if (pedido.Estado != "Recibido")
+            {
+                return Forbid("Este pedido ya no se puede modificar.");
+            }
+
+            pedido.NombreCliente = nombreCliente;
+            pedido.Telefono = telefono;
+            pedido.DireccionEntrega = direccionEntrega;
+            pedido.Latitud = latitud;
+            pedido.Longitud = longitud;
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("VerPedido", new { token = pedido.AccesoToken });
         }
     }
 }

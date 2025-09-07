@@ -17,22 +17,84 @@
 	<p class="lead">Hemos recibido tu pedido y ya lo estamos preparando.</p>
 	<hr />
 	<p>Tu número de confirmación es: <strong>#@Model.Id</strong></p>
-	<div class="mt-3">
+    @{
+        // Lógica para determinar el estilo inicial del badge
+        // ¡USA COMILLAS DOBLES para asignar cadenas de texto!
+        var colorBadge = "bg-secondary";
+        var iconoBadge = "bi-question-circle";
+        switch (Model.Estado)
+        {
+            case "Recibido": colorBadge = "bg-primary"; iconoBadge = "bi-envelope"; break;
+            case "En preparación": colorBadge = "bg-warning text-dark"; iconoBadge = "bi-fire"; break;
+            case "En camino": colorBadge = "bg-info text-dark"; iconoBadge = "bi-truck"; break;
+            case "Completado": colorBadge = "bg-success"; iconoBadge = "bi-check2-circle"; break;
+            case "Cancelado": colorBadge = "bg-danger"; iconoBadge = "bi-x-circle"; break;
+        }
+    }
+
+    <div class="mt-3">
         <h4>
             Estado de tu Pedido:
-            <span id="estado-pedido" class="badge bg-primary fs-5">
-                <i id="icono-estado" class="bi bi-envelope me-1"></i> Recibido
+            <span id="estado-pedido" class="badge fs-5 @colorBadge">
+                <i id="icono-estado" class="bi @iconoBadge me-1"></i> @Model.Estado
             </span>
         </h4>
-	</div>
+    </div>
 	<div class="mt-4">
 		<a asp-action="Index" asp-controller="Home" class="btn btn-primary">Volver al Menú</a>
 	</div>
 </div>
 
 <hr />
-<div class="row justify-content-center">
-    <div class="col-md-8">
+
+<div class="row g-5 justify-content-center">
+    @* --- Columna para Detalles de Entrega --- *@
+    <div class="col-md-6">
+        <h4>Detalles de Entrega</h4>
+
+        <form asp-action="ActualizarDatosPedido" method="post">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <input type="hidden" id="latitud-input" name="latitud" value="@Model.Latitud.Value.ToString().Replace(",", ".")" />
+            <input type="hidden" id="longitud-input" name="longitud" value="@Model.Longitud.Value.ToString().Replace(",", ".")" />        
+
+        <dl class="row">
+            <dt class="col-sm-4">Nombre:</dt>
+            <dd class="col-sm-8">
+                <input type="text" name="nombreCliente" class="form-control-plaintext editable-field" value="@Model.NombreCliente" readonly />
+            </dd>
+
+            <dt class="col-sm-4">Teléfono:</dt>
+            <dd class="col-sm-8">
+                <input type="text" name="telefono" class="form-control-plaintext editable-field" value="@Model.Telefono" readonly />
+            </dd>
+
+            <dt class="col-sm-4">Dirección:</dt>
+            <dd class="col-sm-8">
+                <input type="text" name="direccionEntrega" class="form-control-plaintext" value="@Model.DireccionEntrega" readonly />
+            </dd>
+        </dl>
+        
+        @if (Model.Estado == "Recibido")
+        {
+            <div id="botones-edicion">
+                <button type="button" id="btn-editar" class="btn btn-warning">Editar Datos</button>
+                <button type="submit" id="btn-guardar" class="btn btn-success d-none">Guardar Cambios</button>
+            </div>
+            <p class="form-text" id="mensaje-editable">Puedes editar tus datos mientras el pedido no este en preparación.</p>
+            <p class="form-text text-info d-none" id="mensaje-no-editable">Los detalles del pedido ya no se pueden modificar.</p>
+        }
+        else
+        {
+            <p class="form-text text-info" id="mensaje-no-editable">Los detalles del pedido ya no se pueden modificar.</p>
+        }
+        </form>
+
+        <h5>Ubicacion en el Mapa</h5>
+        <div id="map" style="height:300px; width:100%;" class="rounded"></div>
+    </div>
+
+    @* --- Columna para Chat --- *@
+    <div class="col-md-6">
         <h4>Chat con la Pizzería</h4>
         <div id="chat-box" class="border p-3 mb-2" style="height: 200px; overflow-y: scroll;">
         </div>
@@ -43,33 +105,30 @@
     </div>
 </div>
 
+
 @section Scripts {
     <script>
-        // --- 1. CONFIGURACIÓN INICIAL ---
+            // --- INICIALIZACIÓN DE ELEMENTOS ---
+        const btnEditar = document.getElementById('btn-editar');
         const connection = new signalR.HubConnectionBuilder().withUrl("/pedidoHub").build();
-
         const pedidoId = "@Model.Id";
         const accesoToken = "@Model.AccesoToken";
-
         const nombreUsuarioChat = "@(User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Admin") ? "Admin" : "Cliente")";
-
         const mensajeInput = document.getElementById("mensaje-input");
         const enviarMensajeBtn = document.getElementById("enviar-mensaje-btn");
         const chatBox = document.getElementById("chat-box");
         const estadoElement = document.getElementById("estado-pedido");
 
 
+            // --- LÓGICA DE GUARDADO EN LOCALSTORAGE (Corregido 'pedidoActivos' a 'pedidosActivos') ---
         function guardarPedidoActivo(token) {
             if (!token) return;
-            let pedidosActivos = JSON.parse(localStorage.getItem('pedidoActivos')) || [];
-
+            let pedidosActivos = JSON.parse(localStorage.getItem('pedidosActivos')) || []; // CORRECCIÓN AQUÍ
             if (!pedidosActivos.includes(token)) {
                 pedidosActivos.push(token);
             }
-
             localStorage.setItem('pedidosActivos', JSON.stringify(pedidosActivos));
         }
-
         guardarPedidoActivo(accesoToken);
 
         // --- 2. FUNCIÓN CENTRALIZADA PARA ENVIAR MENSAJE ---
@@ -85,7 +144,7 @@
         // --- 3. LÓGICA PARA RECIBIR DATOS DEL SERVIDOR ---
 
         // Lógica para actualizar el estado del pedido en tiempo real
-               connection.on("RecibirActualizacionEstado", function (nuevoEstado) {
+                connection.on("RecibirActualizacionEstado", function (nuevoEstado) {
             console.log("Nuevo estado recibido:", nuevoEstado);
             const estadoElement = document.getElementById("estado-pedido");
 
@@ -114,16 +173,31 @@
                         colorBadge = "bg-danger";
                         iconoBadge = "bi-x-circle";
                         break;
-
                 }
 
-                // --- INICIO DE LA CORRECCIÓN ---
-                // 1. Actualizamos la clase del color en el <span> principal
                 estadoElement.className = "badge fs-5 " + colorBadge;
-
-                // 2. Reconstruimos el contenido HTML interno para incluir el nuevo ícono y el texto
                 estadoElement.innerHTML = `<i class="bi ${iconoBadge} me-1"></i> ${nuevoEstado}`;
-                // --- FIN DE LA CORRECCIÓN ---
+
+                // --- LÓGICA AÑADIDA PARA OCULTAR EL BOTÓN ---
+                const botonesEdicion = document.getElementById('botones-edicion');
+                const mensajeEditable = document.getElementById('mensaje-editable');
+                const mensajeNoEditable = document.getElementById('mensaje-no-editable');
+
+                if (nuevoEstado === "Recibido") {
+                    // MOSTRAR elementos de edicion
+                    if (botonesEdicion) botonesEdicion.classList.remove('d-none');
+                    if (mensajeEditable) mensajeEditable.classList.remove('d-none');
+
+                    // OCULTAR mensaje de "no editable"
+                    if (mensajeNoEditable) mensajeNoEditable.classList.add('d-none');
+                } else {
+                    // OCULTAR elementos de edicion
+                    if (botonesEdicion) botonesEdicion.classList.add('d-none');
+                    if (mensajeEditable) mensajeEditable.classList.add('d-none');
+
+                    // MOSTRAR mensaje de "no editable"
+                    if (mensajeNoEditable) mensajeNoEditable.classList.remove('d-none');
+                }
             }
         });
         
@@ -157,9 +231,27 @@
                 event.preventDefault();
                 enviarMensaje();
             }
-        });
+        });       
 
-        // --- 5. INICIAR CONEXIÓN ---
+            // --- LÓGICA PARA HABILITAR LA EDICIÓN (Corregida) ---
+        if (btnEditar) { // El if ya estaba bien, pero lo muevo aquí por orden
+            btnEditar.addEventListener('click', function() {
+                document.querySelectorAll('.editable-field').forEach(input => {
+                    input.readOnly = false;
+                    input.classList.remove('form-control-plaintext');
+                    input.classList.add('form-control');
+                });
+
+                // CORRECCIÓN: Faltaba un paréntesis de cierre ')'
+                window.marker.setDraggable(true);
+
+                btnEditar.classList.add('d-none');
+                // CORRECCIÓN: Tenías 'btn-guardadr' en el HTML, debe ser 'btn-guardar'
+                document.getElementById('btn-guardar').classList.remove('d-none');
+            });
+        }
+
+            // --- INICIAR CONEXIÓN DE SIGNALR ---
         connection.start().then(function () {
             console.log("Conexión con SignalR establecida.");
             if (pedidoId) {
@@ -167,6 +259,49 @@
             }
         }).catch(function (err) {
             return console.error(err.toString());
-        });        
+        });
+    </script>
+}
+
+@section MapScripts {
+    <script>
+        var marker;
+
+        function initMap() {
+            const lat = @Model.Latitud.Value.ToString().Replace(",", ".");
+            const lng = @Model.Longitud.Value.ToString().Replace(",", ".");
+            const location = { lat: lat, lng: lng };
+            const map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 16,
+                center: location,
+            });
+
+            marker = new google.maps.Marker({
+                position: location,
+                map: map,
+                // CORRECCIÓN: El valor debe ser un booleano, no un string.
+                draggable: @(Model.Estado == "Recibido" ? "false" : "false")
+            });
+
+            // CORRECCIÓN: Es google.maps.event, no google.map.event
+            google.maps.event.addListener(marker, 'dragend', function(event) {
+                const newLat = this.getPosition().lat();
+                const newLng = this.getPosition().lng();
+
+                document.getElementById('latitud-input').value = newLat;
+                document.getElementById('longitud-input').value = newLng;
+
+                const geocoder = new google.maps.Geocoder();
+                // CORRECCIÓN: Es 'results', no 'result'
+                geocoder.geocode({ 'location': { lat: newLat, lng: newLng } }, function (results, status) {
+                    if (status === 'OK' && results[0]) {
+                        document.querySelector('input[name="direccionEntrega"]').value = results[0].formatted_address;
+                    }
+                });
+            });
+        }
+    </script>
+    <script async
+            src="https://maps.googleapis.com/maps/api/js?key=@ViewData["GoogleApiKey"]&callback=initMap">
     </script>
 }
