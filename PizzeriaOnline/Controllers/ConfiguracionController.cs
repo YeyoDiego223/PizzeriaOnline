@@ -32,11 +32,23 @@ public class ConfiguracionController : Controller
     {
         if (ModelState.IsValid)
         {
-            _context.Update(viewModel);
-            await _context.SaveChangesAsync();
+            var configEnDB = await _context.Configuracion.FirstOrDefaultAsync(c => c.Id == viewModel.Id);
 
-            TempData["SuccessMessage"] = "¡Configuración guardad con éxito!";
-            return RedirectToAction("Index", "Admin");
+            if (configEnDB != null)
+            {
+                configEnDB.ForzarCierre = viewModel.ForzarCierre;
+                configEnDB.HoraApertura = viewModel.HoraApertura;
+                configEnDB.HoraCierre = viewModel.HoraCierre;
+
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "¡Configuración guardada con éxito!";
+                return RedirectToAction("Index", "Admin");
+            }
+            else
+            {
+                ModelState.AddModelError("", "No se encontró el registro de configuracion para actualizar.");
+            }            
         }
         return View(viewModel);
     }

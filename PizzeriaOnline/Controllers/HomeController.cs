@@ -23,12 +23,14 @@ namespace PizzeriaOnline.Controllers
         private readonly ApplicationDbContext _context;
         private readonly ILogger<HomeController> _logger;
         private readonly IConfiguration _configuration;
+        private readonly Services.TiendaService _tiendaService;
 
-        public HomeController(ApplicationDbContext context, IWebHostEnvironment hostEnvironment, ILogger<HomeController> logger, IConfiguration configuration)
+        public HomeController(ApplicationDbContext context, IWebHostEnvironment hostEnvironment, ILogger<HomeController> logger, IConfiguration configuration, Services.TiendaService tiendaService)
         {
             _context = context;
             _logger = logger;
             _configuration = configuration;
+            _tiendaService = tiendaService;
         }
 
         public IActionResult Index()
@@ -47,9 +49,8 @@ namespace PizzeriaOnline.Controllers
                 PromocionesActivas = listaDePromociones
             };
 
-            return View(viewModel);
-
-            
+            ViewData["EstaAbierta"] = _tiendaService.EstaAbierta();
+            return View(viewModel);            
         }
 
         public IActionResult Constructor()
@@ -63,6 +64,7 @@ namespace PizzeriaOnline.Controllers
                                         .OrderBy(p => p.Nombre)
                                         .ToList()
             };
+            ViewData["EstaAbierta"] = _tiendaService.EstaAbierta();
             return View(viewModel);
         }
 
@@ -134,6 +136,7 @@ namespace PizzeriaOnline.Controllers
                 TotalGeneral = pizzas.Sum(p => p.PrecioFinal * p.Cantidad) + extras.Sum(e => e.Subtotal),
                 ExtrasDisponibles = await _context.ProductoExtras.Where(p => p.CantidadEnStock > 0).ToListAsync()
             };
+            ViewData["EstaAbierta"] = _tiendaService.EstaAbierta();
             return View(viewModel);
         }
 

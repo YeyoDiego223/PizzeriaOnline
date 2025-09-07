@@ -68,7 +68,7 @@ else
     </table>
 
     <div class="mt-4">
-        <a asp-controller="Home" asp-action="Checkout" class="btn btn-success btn-lg">Proceder al Pago</a>
+        <a asp-controller="Home" asp-action="Checkout" class="btn btn-success btn-lg @(!(bool)ViewData["EstaAbierta"] ? "disabled" : "")">Proceder al Pago</a>
         <a asp-controller="Home" asp-action="Constructor" class="btn btn-secondary btn-lg">Añadir otra Pizza</a>
     </div>
 

@@ -21,6 +21,12 @@
 
 <div class="text-center">
     <h1 class="display-4">Nuestro Menú de Pizzas</h1>
+    @if (!(bool)ViewData["EstaAbierta"])
+    {
+        <div class="alert alert-warning text-center" role="alert">
+            <strong>¡TIENDA CERRADA!</strong> En este momento no estamos tomando pedidos. ¡Te esperamos en nuestro horario habitual!
+        </div>
+    }
     <p>¡Elige tu pizza favorita y pídela ahora!</p>
 </div>
 
@@ -78,7 +84,7 @@
                     <p class="card-text">@pizza.Descripcion</p> @* <-- Corregido a Descripcion *@
                 </div>
                 <div class="card-footer">
-                    <a asp-action="Constructor" class="btn btn-success w-100">¡Arma tu Pizza!</a>
+                    <a asp-action="Constructor" class="btn btn-success w-100 @(!(bool)ViewData["EstaAbierta"] ? "disabled" : "")">¡Arma tu Pizza!</a>
                 </div>
             </div>
         </div>
