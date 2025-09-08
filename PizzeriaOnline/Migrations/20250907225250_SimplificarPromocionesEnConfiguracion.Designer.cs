@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PizzeriaOnline.Data;
 
@@ -10,9 +11,11 @@ using PizzeriaOnline.Data;
 namespace PizzeriaOnline.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250907225250_SimplificarPromocionesEnConfiguracion")]
+    partial class SimplificarPromocionesEnConfiguracion
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.5");
@@ -228,13 +231,10 @@ namespace PizzeriaOnline.Migrations
                     b.Property<TimeSpan>("HoraCierre")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("PromocionDescripcion")
+                    b.Property<decimal?>("PrmocionPrecio")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("PromocionEstaActiva")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<decimal?>("PromocionPrecio")
+                    b.Property<string>("PromocionDescripcion")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PromocionRutaImagen")
@@ -253,8 +253,7 @@ namespace PizzeriaOnline.Migrations
                             Id = 1,
                             ForzarCierre = false,
                             HoraApertura = new TimeSpan(0, 14, 0, 0, 0),
-                            HoraCierre = new TimeSpan(0, 22, 0, 0, 0),
-                            PromocionEstaActiva = false
+                            HoraCierre = new TimeSpan(0, 22, 0, 0, 0)
                         });
                 });
 

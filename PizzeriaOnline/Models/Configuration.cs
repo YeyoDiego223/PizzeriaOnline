@@ -15,5 +15,20 @@ namespace PizzeriaOnline.Models
         [Required]
         [Display(Name = "Hora de Cierre")]
         public TimeSpan HoraCierre { get; set; }
+
+        [Display(Name = "Activar Promoción")]
+        public bool PromocionEstaActiva { get; set; }
+
+        [Display(Name = "Titulo de la Promocion")]
+        public string? PromocionTitulo { get; set; }
+
+        [Display(Name = "Descripcion de la Promoción")]
+        public string? PromocionDescripcion { get; set; }
+
+        [Display(Name = "Precio de la Promoción")]
+        [Range(0, 10000)]
+        public decimal? PromocionPrecio { get; set; }
+
+        public string? PromocionRutaImagen { get; set; }
     }
 }

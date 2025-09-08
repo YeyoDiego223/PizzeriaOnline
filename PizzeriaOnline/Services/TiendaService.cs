@@ -1,6 +1,6 @@
 ﻿using PizzeriaOnline.Data;
-using System;
 using System.Linq;
+using Microsoft.EntityFrameworkCore; // <-- Asegúrate de tener este 'using'
 
 namespace PizzeriaOnline.Services
 {
@@ -15,7 +15,9 @@ namespace PizzeriaOnline.Services
 
         public bool EstaAbierta()
         {
-            var config = _context.Configuracion.FirstOrDefault();
+            // --- LA CORRECCIÓN ESTÁ AQUÍ ---
+            // Añadimos AsNoTracking() para asegurar que siempre lea el dato más reciente
+            var config = _context.Configuracion.AsNoTracking().FirstOrDefault();
 
             if (config == null)
             {
@@ -24,11 +26,10 @@ namespace PizzeriaOnline.Services
 
             if (config.ForzarCierre)
             {
-                return true;
+                return false;
             }
 
             var horaActual = DateTime.Now.TimeOfDay;
-
             return horaActual >= config.HoraApertura && horaActual < config.HoraCierre;
         }
     }

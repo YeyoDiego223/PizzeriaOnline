@@ -35,9 +35,7 @@ namespace PizzeriaOnline.Controllers
 
         public IActionResult Index()
         {
-            var listaDePromociones = _context.Promociones
-                .Where(p => p.EstaActiva)
-                .ToList();
+            var configuracion = _context.Configuracion.FirstOrDefault(); // Obtenemos toda la configuración
 
             var listaDePizzas = _context.Pizzas
                 .Include(p => p.Imagenes)
@@ -46,9 +44,10 @@ namespace PizzeriaOnline.Controllers
             var viewModel = new HomeIndexViewModel
             {
                 PizzasDisponibles = listaDePizzas,
-                PromocionesActivas = listaDePromociones
+                Configuracion = configuracion
             };
 
+            bool estaAbiertaResultado = _tiendaService.EstaAbierta();
             ViewData["EstaAbierta"] = _tiendaService.EstaAbierta();
             return View(viewModel);            
         }

@@ -132,7 +132,6 @@ namespace PizzeriaOnline.Data
         public DbSet<ProductoExtra> ProductoExtras { get; set; }
 
         public DbSet<MensajeChat> MensajesChat { get; set; }
-        public DbSet<Promocion> Promociones { get; set; }
         public DbSet<PizzaImagen> PizzaImagenes { get; set; }
 
         public DbSet<Configuracion> Configuracion { get; set; }
