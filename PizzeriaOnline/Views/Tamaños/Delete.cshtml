@@ -1,0 +1,22 @@
+﻿@model PizzeriaOnline.Models.Tamaño
+@{
+    ViewData["Title"] = "Eliminar Tamaño";
+}
+
+<h1>@ViewData["Title"]</h1>
+<h3 class="text-danger">¿Estás seguro de que quieres eliminar este tamaño?</h3>
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-4">Nombre</dt>
+        <dd class="col-sm-8">@Html.DisplayFor(model => model.Nombre)</dd>
+        <dt class="col-sm-4">Precio Base</dt>
+        <dd class="col-sm-8">@Html.DisplayFor(model => model.PrecioBase)</dd>
+    </dl>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn btn-danger">Sí, Eliminar</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>

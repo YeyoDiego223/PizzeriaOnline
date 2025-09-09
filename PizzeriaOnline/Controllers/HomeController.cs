@@ -203,9 +203,19 @@ namespace PizzeriaOnline.Controllers
         }
 
         public async Task<IActionResult> Checkout()
-        {           
+        {
             var carritoJson = HttpContext.Session.GetString("Carrito");
             var carritoExtrasJson = HttpContext.Session.GetString("CarritoExtras");
+
+            // --- AÑADE ESTA VALIDACIÓN AL INICIO ---
+            if (string.IsNullOrEmpty(carritoJson) && string.IsNullOrEmpty(carritoExtrasJson))
+            {
+                // Si ambos carritos están vacíos, no hay nada que finalizar.
+                // Redirigimos al usuario a la página del carrito, donde verá un mensaje claro.
+                return RedirectToAction("Carrito");
+            }
+            // --- FIN DE LA VALIDACIÓN ---
+
             var googleApiKey = _configuration["Google:ApiKey"];
             ViewData["GoogleApiKey"] = googleApiKey;
 
@@ -217,7 +227,7 @@ namespace PizzeriaOnline.Controllers
                 ? JsonConvert.DeserializeObject<List<CarritoExtraViewModel>>(carritoExtrasJson)
                 : new List<CarritoExtraViewModel>();
 
-            var viewMdel = new CheckoutViewModel
+            var viewModel = new CheckoutViewModel
             {
                 Carrito = carrito,
                 CarritoExtras = carritoExtras,
@@ -225,7 +235,7 @@ namespace PizzeriaOnline.Controllers
                 ExtrasDisponibles = await _context.ProductoExtras.Where(p => p.CantidadEnStock > 0).ToListAsync()
             };
 
-            return View(viewMdel);
+            return View(viewModel);
         }
 
         public IActionResult Contacto()

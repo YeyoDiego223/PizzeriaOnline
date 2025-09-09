@@ -18,8 +18,7 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddSignalR();
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("ProductionConnection")));
 
 builder.Services.AddScoped<PizzeriaOnline.Services.TiendaService>();
 

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PizzeriaOnline.Data;
@@ -11,37 +12,42 @@ using PizzeriaOnline.Data;
 namespace PizzeriaOnline.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250717013242_AddTamañoIdToDetallePedido")]
-    partial class AddTamañoIdToDetallePedido
+    [Migration("20250909022817_Inicial")]
+    partial class Inicial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.5");
+            modelBuilder
+                .HasAnnotation("ProductVersion", "9.0.8")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .HasMaxLength(256)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("NormalizedName")
                         .HasMaxLength(256)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedName")
                         .IsUnique()
-                        .HasDatabaseName("RoleNameIndex");
+                        .HasDatabaseName("RoleNameIndex")
+                        .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
                 });
@@ -50,17 +56,19 @@ namespace PizzeriaOnline.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RoleId")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
@@ -72,54 +80,54 @@ namespace PizzeriaOnline.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUser", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("AccessFailedCount")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bit");
 
                     b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bit");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("PasswordHash")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bit");
 
                     b.Property<string>("SecurityStamp")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bit");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
 
@@ -128,7 +136,8 @@ namespace PizzeriaOnline.Migrations
 
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
-                        .HasDatabaseName("UserNameIndex");
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -137,17 +146,19 @@ namespace PizzeriaOnline.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
@@ -160,18 +171,18 @@ namespace PizzeriaOnline.Migrations
                 {
                     b.Property<string>("LoginProvider")
                         .HasMaxLength(128)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("ProviderKey")
                         .HasMaxLength(128)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("ProviderDisplayName")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
@@ -183,10 +194,10 @@ namespace PizzeriaOnline.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
                     b.Property<string>("UserId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("RoleId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("UserId", "RoleId");
 
@@ -198,45 +209,101 @@ namespace PizzeriaOnline.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
                     b.Property<string>("UserId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("LoginProvider")
                         .HasMaxLength(128)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Name")
                         .HasMaxLength(128)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Value")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("PizzeriaOnline.Models.Configuracion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("ForzarCierre")
+                        .HasColumnType("bit");
+
+                    b.Property<TimeSpan>("HoraApertura")
+                        .HasColumnType("time");
+
+                    b.Property<TimeSpan>("HoraCierre")
+                        .HasColumnType("time");
+
+                    b.Property<string>("PromocionDescripcion")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PromocionEstaActiva")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("PromocionPrecio")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<string>("PromocionRutaImagen")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PromocionTitulo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Configuracion");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            ForzarCierre = false,
+                            HoraApertura = new TimeSpan(0, 14, 0, 0, 0),
+                            HoraCierre = new TimeSpan(0, 22, 0, 0, 0),
+                            PromocionDescripcion = "",
+                            PromocionEstaActiva = false,
+                            PromocionPrecio = 0m,
+                            PromocionRutaImagen = "",
+                            PromocionTitulo = ""
+                        });
+                });
+
             modelBuilder.Entity("PizzeriaOnline.Models.DetallePedido", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("Cantidad")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<string>("NombreTamaño")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("PedidoId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<decimal>("PrecioUnitario")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("decimal(18, 2)");
 
-                    b.Property<int>("TamañoId")
-                        .HasColumnType("INTEGER");
+                    b.Property<int?>("ProductoExtraId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TamañoId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -248,10 +315,10 @@ namespace PizzeriaOnline.Migrations
             modelBuilder.Entity("PizzeriaOnline.Models.DetalleSabor", b =>
                 {
                     b.Property<int>("DetallePedidoId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int>("PizzaId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.HasKey("DetallePedidoId", "PizzaId");
 
@@ -264,51 +331,95 @@ namespace PizzeriaOnline.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
-                    b.Property<double>("CantidadEnStock")
-                        .HasColumnType("REAL");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("CantidadEnStock")
+                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UnidadDeMedida")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.ToTable("Ingredientes");
                 });
 
+            modelBuilder.Entity("PizzeriaOnline.Models.MensajeChat", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Autor")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("FechaEnvio")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PedidoId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Texto")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MensajesChat");
+                });
+
             modelBuilder.Entity("PizzeriaOnline.Models.Pedido", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<Guid>("AccesoToken")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("DireccionEntrega")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Estado")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("FechaPedido")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime2");
+
+                    b.Property<double?>("Latitud")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("Longitud")
+                        .HasColumnType("float");
+
+                    b.Property<string>("MetodoPago")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NombreCliente")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Telefono")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("TotalPedido")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("decimal(18, 2)");
 
                     b.HasKey("Id");
 
@@ -319,19 +430,17 @@ namespace PizzeriaOnline.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Descripcion")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("RutaImagen")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -342,73 +451,175 @@ namespace PizzeriaOnline.Migrations
                         {
                             Id = 1,
                             Descripcion = "Masa maestra, salsa secreta, aceitunas negras, morrón, elote, cebolla morada, pepperoni, piña, champiñones, romero, mozzarella",
-                            Nombre = "Monumental",
-                            RutaImagen = "/images/pizzas/monumental.jpg"
+                            Nombre = "Monumental"
                         },
                         new
                         {
                             Id = 2,
                             Descripcion = "Masa maestra, salsa secreta, queso mozzarella, albhaca fresca.",
-                            Nombre = "Macarena",
-                            RutaImagen = "/images/pizzas/macarena.jpg"
+                            Nombre = "Macarena"
                         },
                         new
                         {
                             Id = 3,
                             Descripcion = "Masa maestra, salsa secreta, piña, jamón, mozzarella",
-                            Nombre = "Sevillana",
-                            RutaImagen = "/images/pizzas/sevillana.jpg"
+                            Nombre = "Sevillana"
                         },
                         new
                         {
                             Id = 4,
                             Descripcion = "Masa maestra, salsa secreta, pepperoni , mozzarella",
-                            Nombre = "Manoletina",
-                            RutaImagen = "/images/pizzas/manoletina.jpg"
+                            Nombre = "Manoletina"
                         },
                         new
                         {
                             Id = 5,
                             Descripcion = "Masa maestra, salsa secreta, frijoles, elote, morrón, tocino, chorizo, rodajas de serrano",
-                            Nombre = "Miura",
-                            RutaImagen = "/images/pizzas/miura.jpg"
+                            Nombre = "Miura"
                         },
                         new
                         {
                             Id = 6,
                             Descripcion = "Masa maestra salsa secreta, carne de alambre, mozzarella",
-                            Nombre = "Zapopina",
-                            RutaImagen = "/images/pizzas/zapopina.jpg"
+                            Nombre = "Zapopina"
                         },
                         new
                         {
                             Id = 7,
                             Descripcion = "Masa maestra, salsa secreta, queso chihuaha, queso monterrey jack, queso cheddar, queso asadero, queso mozzarela",
-                            Nombre = "Chicuelina",
-                            RutaImagen = "/images/pizzas/chicuelina.jpg"
+                            Nombre = "Chicuelina"
                         },
                         new
                         {
                             Id = 8,
                             Descripcion = "Masa maestra, salsa secreta, carne al pastor, mozzarella",
-                            Nombre = "San Fermin",
+                            Nombre = "San Fermin"
+                        });
+                });
+
+            modelBuilder.Entity("PizzeriaOnline.Models.PizzaImagen", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("EsImagenPrincipal")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("PizzaId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RutaImagen")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PizzaId");
+
+                    b.ToTable("PizzaImagenes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            EsImagenPrincipal = true,
+                            PizzaId = 1,
+                            RutaImagen = "/images/pizzas/monumental.jpg"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            EsImagenPrincipal = true,
+                            PizzaId = 2,
+                            RutaImagen = "/images/pizzas/macarena.jpg"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            EsImagenPrincipal = true,
+                            PizzaId = 3,
+                            RutaImagen = "/images/pizzas/sevillana.jpg"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            EsImagenPrincipal = true,
+                            PizzaId = 4,
+                            RutaImagen = "/images/pizzas/manoletina.jpg"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            EsImagenPrincipal = true,
+                            PizzaId = 5,
+                            RutaImagen = "/images/pizzas/miura.jpg"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            EsImagenPrincipal = true,
+                            PizzaId = 6,
+                            RutaImagen = "/images/pizzas/zapopina.jpg"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            EsImagenPrincipal = true,
+                            PizzaId = 7,
+                            RutaImagen = "/images/pizzas/chicuelina.jpg"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            EsImagenPrincipal = true,
+                            PizzaId = 8,
                             RutaImagen = "/images/pizzas/san_fermin.jpg"
                         });
+                });
+
+            modelBuilder.Entity("PizzeriaOnline.Models.ProductoExtra", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CantidadEnStock")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Precio")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<string>("RutaImagen")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ProductoExtras");
                 });
 
             modelBuilder.Entity("PizzeriaOnline.Models.Receta", b =>
                 {
                     b.Property<int>("PizzaId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int>("TamañoId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int>("IngredienteId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
-                    b.Property<double>("Cantidad")
-                        .HasColumnType("REAL");
+                    b.Property<decimal>("Cantidad")
+                        .HasColumnType("decimal(18, 2)");
 
                     b.HasKey("PizzaId", "TamañoId", "IngredienteId");
 
@@ -423,24 +634,26 @@ namespace PizzeriaOnline.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Dimensiones")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("MaximoSabores")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("NumeroRebanadas")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<decimal>("PrecioBase")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("decimal(18, 2)");
 
                     b.HasKey("Id");
 
@@ -575,6 +788,17 @@ namespace PizzeriaOnline.Migrations
                     b.Navigation("Pizza");
                 });
 
+            modelBuilder.Entity("PizzeriaOnline.Models.PizzaImagen", b =>
+                {
+                    b.HasOne("PizzeriaOnline.Models.Pizza", "Pizza")
+                        .WithMany("Imagenes")
+                        .HasForeignKey("PizzaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Pizza");
+                });
+
             modelBuilder.Entity("PizzeriaOnline.Models.Receta", b =>
                 {
                     b.HasOne("PizzeriaOnline.Models.Ingrediente", "Ingrediente")
@@ -615,6 +839,8 @@ namespace PizzeriaOnline.Migrations
             modelBuilder.Entity("PizzeriaOnline.Models.Pizza", b =>
                 {
                     b.Navigation("DetalleSabores");
+
+                    b.Navigation("Imagenes");
                 });
 #pragma warning restore 612, 618
         }

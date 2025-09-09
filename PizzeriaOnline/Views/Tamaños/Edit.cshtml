@@ -1,0 +1,44 @@
+﻿@model PizzeriaOnline.Models.Tamaño
+@{
+    ViewData["Title"] = "Editar Tamaño";
+}
+
+<h1>@ViewData["Title"]</h1>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="mb-3">
+                <label asp-for="Nombre" class="form-label"></label>
+                <input asp-for="Nombre" class="form-control" />
+                <span asp-validation-for="Nombre" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Dimensiones" class="form-label"></label>
+                <input asp-for="Dimensiones" class="form-control" />
+                <span asp-validation-for="Dimensiones" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="NumeroRebanadas" class="form-label"></label>
+                <input asp-for="NumeroRebanadas" type="number" class="form-control" />
+                <span asp-validation-for="NumeroRebanadas" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="PrecioBase" class="form-label"></label>
+                <input asp-for="PrecioBase" type="number" step="0.01" class="form-control" />
+                <span asp-validation-for="PrecioBase" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="MaximoSabores" class="form-label"></label>
+                <input asp-for="MaximoSabores" type="number" class="form-control" />
+                <span asp-validation-for="MaximoSabores" class="text-danger"></span>
+            </div>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
