@@ -15,6 +15,8 @@ using PizzeriaOnline.ViewModels;
 using PizzeriaOnline.ViewModels;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using SendGrid;
+using SendGrid.Helpers.Mail;
 
 namespace PizzeriaOnline.Controllers
 {
@@ -272,13 +274,52 @@ namespace PizzeriaOnline.Controllers
                 checkoutModel.CarritoExtras = carritoExtras;
                 checkoutModel.TotalCarrito = carrito.Sum(i => i.PrecioFinal * i.Cantidad) + carritoExtras.Sum(e => e.Subtotal);
                 checkoutModel.ExtrasDisponibles = await _context.ProductoExtras.Where(p => p.CantidadEnStock > 0).ToListAsync();
-                return View("Checkout", checkoutModel);
+                return View("Checkout", checkoutModel);                
             }
 
             var nuevoPedido = await CrearPedidoDesdeSesion(checkoutModel, carrito, carritoExtras);
 
             _context.Pedidos.Add(nuevoPedido);
             await _context.SaveChangesAsync();
+
+            try
+            {
+                var apiKey = _configuration["SendGridKey"];
+                var client = new SendGridClient(apiKey);
+                var from = new EmailAddress("freeiwanna@gmail.com", "Pizzería La Querencia"); // Puedes usar tu propio correo verificado
+                var subject = $"¡Nuevo Pedido! #{nuevoPedido.Id}";
+                var to = new EmailAddress("pizzerialaquerencia@gmail.com", "Admin Pizzería"); // <-- TU CORREO PERSONAL
+
+                // Creamos un enlace directo al pedido en el panel de admin
+                var urlPedido = Url.Action("DetallePedido", "Admin", new { id = nuevoPedido.Id }, Request.Scheme);
+
+                var plainTextContent = $"Has recibido un nuevo pedido. ID: {nuevoPedido.Id}, Cliente: {nuevoPedido.NombreCliente}, Total: {nuevoPedido.TotalPedido:C}";
+                var htmlContent = $@"
+                <h1>¡Nuevo Pedido Recibido!</h1>
+                <p>Se ha registrado un nuevo pedido en el sistema.</p>
+                <ul>
+                    <li><strong>ID Pedido:</strong> {nuevoPedido.Id}</li>
+                    <li><strong>Cliente:</strong> {nuevoPedido.NombreCliente}</li>
+                    <li><strong>Total:</strong> {nuevoPedido.TotalPedido:C}</li>
+                </ul>
+                <p>
+                    <a href='{urlPedido}' style='padding: 10px 15px; background-color: #0d6efd; color: white; text-decoration: none; border-radius: 5px;'>
+                        Ver Pedido en el Panel de Admin
+                    </a>
+                </p>";
+
+                var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
+                var response = await client.SendEmailAsync(msg);
+
+                // Opcional: Registrar si el correo se envió o no
+                _logger.LogInformation(response.IsSuccessStatusCode
+                    ? $"Correo de nuevo pedido #{nuevoPedido.Id} enviado a {to.Email}"
+                    : $"Error al enviar correo de nuevo pedido #{nuevoPedido.Id}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error catastrófico al intentar enviar correo para pedido #{nuevoPedido.Id}");
+            }
 
             HttpContext.Session.Remove("Carrito");
             HttpContext.Session.Remove("CarritoExtras");

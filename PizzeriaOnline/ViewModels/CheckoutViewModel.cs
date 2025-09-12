@@ -9,12 +9,14 @@ namespace PizzeriaOnline.ViewModels
         // --- Datos para mostrar el resumen del pedido ---i
         public List<CarritoItem> Carrito { get; set; } = new List<CarritoItem>();
         public decimal TotalCarrito { get; set; }
-        
+
         // --- Datos que el cliente llenara en el formulario ---
         [Required(ErrorMessage = "El nombre es obligatorio.")]
+        [Display(Name = "Nombre Completo")] // <-- AÑADE ESTO
         public string NombreCliente { get; set; }
 
         [Required(ErrorMessage = "La dirección es obligatoria.")]
+        [Display(Name = "Dirección de Entrega")] // <-- AÑADE ESTO
         public string DireccionEntrega { get; set; }
 
         [Required(ErrorMessage = "El teléfono es obligatorio.")]
