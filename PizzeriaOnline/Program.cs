@@ -18,7 +18,20 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddSignalR();
 
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("ProductionConnection")));
+if (builder.Environment.IsDevelopment())
+{
+    // Ambiente de Desarrollo (tu máquina local)
+    // Usa la base de datos SQLite.
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+}
+else
+{
+    // Ambiente de Producción (cuando se publica en Render)
+    // Usa la base de datos PostgreSQL.
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseNpgsql(builder.Configuration.GetConnectionString("ProductionConnection")));
+}
 
 builder.Services.AddScoped<PizzeriaOnline.Services.TiendaService>();
 
