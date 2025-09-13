@@ -17,10 +17,10 @@ namespace PizzeriaOnline.Migrations
                 name: "AspNetRoles",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    NormalizedName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
+                    NormalizedName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -31,21 +31,21 @@ namespace PizzeriaOnline.Migrations
                 name: "AspNetUsers",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneNumberConfirmed = table.Column<bool>(type: "bit", nullable: false),
-                    TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    LockoutEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    AccessFailedCount = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    UserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
+                    NormalizedUserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
+                    Email = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
+                    NormalizedEmail = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
+                    EmailConfirmed = table.Column<bool>(type: "INTEGER", nullable: false),
+                    PasswordHash = table.Column<string>(type: "TEXT", nullable: true),
+                    SecurityStamp = table.Column<string>(type: "TEXT", nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "TEXT", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "TEXT", nullable: true),
+                    PhoneNumberConfirmed = table.Column<bool>(type: "INTEGER", nullable: false),
+                    TwoFactorEnabled = table.Column<bool>(type: "INTEGER", nullable: false),
+                    LockoutEnd = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
+                    LockoutEnabled = table.Column<bool>(type: "INTEGER", nullable: false),
+                    AccessFailedCount = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -56,16 +56,16 @@ namespace PizzeriaOnline.Migrations
                 name: "Configuracion",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ForzarCierre = table.Column<bool>(type: "bit", nullable: false),
-                    HoraApertura = table.Column<TimeSpan>(type: "time", nullable: false),
-                    HoraCierre = table.Column<TimeSpan>(type: "time", nullable: false),
-                    PromocionEstaActiva = table.Column<bool>(type: "bit", nullable: false),
-                    PromocionTitulo = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PromocionDescripcion = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PromocionPrecio = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
-                    PromocionRutaImagen = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ForzarCierre = table.Column<bool>(type: "INTEGER", nullable: false),
+                    HoraApertura = table.Column<TimeSpan>(type: "TEXT", nullable: false),
+                    HoraCierre = table.Column<TimeSpan>(type: "TEXT", nullable: false),
+                    PromocionEstaActiva = table.Column<bool>(type: "INTEGER", nullable: false),
+                    PromocionTitulo = table.Column<string>(type: "TEXT", nullable: true),
+                    PromocionDescripcion = table.Column<string>(type: "TEXT", nullable: true),
+                    PromocionPrecio = table.Column<decimal>(type: "decimal(18, 2)", nullable: true),
+                    PromocionRutaImagen = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -76,11 +76,11 @@ namespace PizzeriaOnline.Migrations
                 name: "Ingredientes",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Nombre = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CantidadEnStock = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    UnidadDeMedida = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Nombre = table.Column<string>(type: "TEXT", nullable: false),
+                    CantidadEnStock = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
+                    UnidadDeMedida = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -91,12 +91,12 @@ namespace PizzeriaOnline.Migrations
                 name: "MensajesChat",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    PedidoId = table.Column<int>(type: "int", nullable: false),
-                    Autor = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Texto = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FechaEnvio = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    PedidoId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Autor = table.Column<string>(type: "TEXT", nullable: false),
+                    Texto = table.Column<string>(type: "TEXT", nullable: false),
+                    FechaEnvio = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -107,18 +107,18 @@ namespace PizzeriaOnline.Migrations
                 name: "Pedidos",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    FechaPedido = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    NombreCliente = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    DireccionEntrega = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Telefono = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    TotalPedido = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Estado = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Latitud = table.Column<double>(type: "float", nullable: true),
-                    Longitud = table.Column<double>(type: "float", nullable: true),
-                    MetodoPago = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AccesoToken = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    FechaPedido = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    NombreCliente = table.Column<string>(type: "TEXT", nullable: false),
+                    DireccionEntrega = table.Column<string>(type: "TEXT", nullable: false),
+                    Telefono = table.Column<string>(type: "TEXT", nullable: false),
+                    TotalPedido = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
+                    Estado = table.Column<string>(type: "TEXT", nullable: false),
+                    Latitud = table.Column<double>(type: "REAL", nullable: true),
+                    Longitud = table.Column<double>(type: "REAL", nullable: true),
+                    MetodoPago = table.Column<string>(type: "TEXT", nullable: false),
+                    AccesoToken = table.Column<Guid>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -129,10 +129,10 @@ namespace PizzeriaOnline.Migrations
                 name: "Pizzas",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Nombre = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Descripcion = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Nombre = table.Column<string>(type: "TEXT", nullable: false),
+                    Descripcion = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -143,12 +143,12 @@ namespace PizzeriaOnline.Migrations
                 name: "ProductoExtras",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Nombre = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Precio = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    CantidadEnStock = table.Column<int>(type: "int", nullable: false),
-                    RutaImagen = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Nombre = table.Column<string>(type: "TEXT", nullable: false),
+                    Precio = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
+                    CantidadEnStock = table.Column<int>(type: "INTEGER", nullable: false),
+                    RutaImagen = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -159,13 +159,13 @@ namespace PizzeriaOnline.Migrations
                 name: "Tamaños",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Nombre = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Dimensiones = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    NumeroRebanadas = table.Column<int>(type: "int", nullable: false),
-                    PrecioBase = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    MaximoSabores = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Nombre = table.Column<string>(type: "TEXT", nullable: false),
+                    Dimensiones = table.Column<string>(type: "TEXT", nullable: false),
+                    NumeroRebanadas = table.Column<int>(type: "INTEGER", nullable: false),
+                    PrecioBase = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
+                    MaximoSabores = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -176,11 +176,11 @@ namespace PizzeriaOnline.Migrations
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    RoleId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    RoleId = table.Column<string>(type: "TEXT", nullable: false),
+                    ClaimType = table.Column<string>(type: "TEXT", nullable: true),
+                    ClaimValue = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -197,11 +197,11 @@ namespace PizzeriaOnline.Migrations
                 name: "AspNetUserClaims",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    UserId = table.Column<string>(type: "TEXT", nullable: false),
+                    ClaimType = table.Column<string>(type: "TEXT", nullable: true),
+                    ClaimValue = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -218,10 +218,10 @@ namespace PizzeriaOnline.Migrations
                 name: "AspNetUserLogins",
                 columns: table => new
                 {
-                    LoginProvider = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    ProviderKey = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    ProviderDisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    LoginProvider = table.Column<string>(type: "TEXT", maxLength: 128, nullable: false),
+                    ProviderKey = table.Column<string>(type: "TEXT", maxLength: 128, nullable: false),
+                    ProviderDisplayName = table.Column<string>(type: "TEXT", nullable: true),
+                    UserId = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -238,8 +238,8 @@ namespace PizzeriaOnline.Migrations
                 name: "AspNetUserRoles",
                 columns: table => new
                 {
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    RoleId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    UserId = table.Column<string>(type: "TEXT", nullable: false),
+                    RoleId = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -262,10 +262,10 @@ namespace PizzeriaOnline.Migrations
                 name: "AspNetUserTokens",
                 columns: table => new
                 {
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    LoginProvider = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    Value = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    UserId = table.Column<string>(type: "TEXT", nullable: false),
+                    LoginProvider = table.Column<string>(type: "TEXT", maxLength: 128, nullable: false),
+                    Name = table.Column<string>(type: "TEXT", maxLength: 128, nullable: false),
+                    Value = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -282,14 +282,14 @@ namespace PizzeriaOnline.Migrations
                 name: "DetallePedidos",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Cantidad = table.Column<int>(type: "int", nullable: false),
-                    PrecioUnitario = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    NombreTamaño = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    TamañoId = table.Column<int>(type: "int", nullable: true),
-                    ProductoExtraId = table.Column<int>(type: "int", nullable: true),
-                    PedidoId = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Cantidad = table.Column<int>(type: "INTEGER", nullable: false),
+                    PrecioUnitario = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
+                    NombreTamaño = table.Column<string>(type: "TEXT", nullable: false),
+                    TamañoId = table.Column<int>(type: "INTEGER", nullable: true),
+                    ProductoExtraId = table.Column<int>(type: "INTEGER", nullable: true),
+                    PedidoId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -306,11 +306,11 @@ namespace PizzeriaOnline.Migrations
                 name: "PizzaImagenes",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    RutaImagen = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    EsImagenPrincipal = table.Column<bool>(type: "bit", nullable: false),
-                    PizzaId = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    RutaImagen = table.Column<string>(type: "TEXT", nullable: false),
+                    EsImagenPrincipal = table.Column<bool>(type: "INTEGER", nullable: false),
+                    PizzaId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -327,10 +327,10 @@ namespace PizzeriaOnline.Migrations
                 name: "Recetas",
                 columns: table => new
                 {
-                    PizzaId = table.Column<int>(type: "int", nullable: false),
-                    TamañoId = table.Column<int>(type: "int", nullable: false),
-                    IngredienteId = table.Column<int>(type: "int", nullable: false),
-                    Cantidad = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    PizzaId = table.Column<int>(type: "INTEGER", nullable: false),
+                    TamañoId = table.Column<int>(type: "INTEGER", nullable: false),
+                    IngredienteId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Cantidad = table.Column<decimal>(type: "decimal(18, 2)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -359,8 +359,8 @@ namespace PizzeriaOnline.Migrations
                 name: "DetalleSabores",
                 columns: table => new
                 {
-                    DetallePedidoId = table.Column<int>(type: "int", nullable: false),
-                    PizzaId = table.Column<int>(type: "int", nullable: false)
+                    DetallePedidoId = table.Column<int>(type: "INTEGER", nullable: false),
+                    PizzaId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -382,7 +382,7 @@ namespace PizzeriaOnline.Migrations
             migrationBuilder.InsertData(
                 table: "Configuracion",
                 columns: new[] { "Id", "ForzarCierre", "HoraApertura", "HoraCierre", "PromocionDescripcion", "PromocionEstaActiva", "PromocionPrecio", "PromocionRutaImagen", "PromocionTitulo" },
-                values: new object[] { 1, false, new TimeSpan(0, 14, 0, 0, 0), new TimeSpan(0, 22, 0, 0, 0), "", false, 0m, "", "" });
+                values: new object[] { 1, false, new TimeSpan(0, 14, 0, 0, 0), new TimeSpan(0, 22, 0, 0, 0), null, false, null, null, null });
 
             migrationBuilder.InsertData(
                 table: "Pizzas",
@@ -435,8 +435,7 @@ namespace PizzeriaOnline.Migrations
                 name: "RoleNameIndex",
                 table: "AspNetRoles",
                 column: "NormalizedName",
-                unique: true,
-                filter: "[NormalizedName] IS NOT NULL");
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserClaims_UserId",
@@ -462,8 +461,7 @@ namespace PizzeriaOnline.Migrations
                 name: "UserNameIndex",
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
-                unique: true,
-                filter: "[NormalizedUserName] IS NOT NULL");
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_DetallePedidos_PedidoId",

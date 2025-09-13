@@ -80,11 +80,14 @@ namespace PizzeriaOnline.Data
                     ForzarCierre = false,
                     HoraApertura = new TimeSpan(14, 0, 0),
                     HoraCierre = new TimeSpan(22, 0, 0),
-                    PromocionEstaActiva = false, // Valores por defecto para la nueva promo
-                    PromocionTitulo = "",
-                    PromocionDescripcion = "",
-                    PromocionPrecio = 0,
-                    PromocionRutaImagen = ""
+
+                    // --- CORRECCIÓN AQUÍ ---
+                    // Asignamos 'null' a las propiedades que pueden ser nulas
+                    PromocionEstaActiva = false,
+                    PromocionTitulo = null,
+                    PromocionDescripcion = null,
+                    PromocionPrecio = null,
+                    PromocionRutaImagen = null
                 }
             );
 
