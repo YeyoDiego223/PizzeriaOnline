@@ -5,77 +5,64 @@ using PizzeriaOnline.Hubs;
 using PizzeriaOnline.Services;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Logging.AddDebug();
 
-//Add services to the container.
-
+// --- TUS SERVICIOS ORIGINALES ---
 builder.Services.AddScoped<QnAService>();
-
-// Carga la configuración de STripe desde nuestros Secretos de Usuario
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
-
 builder.Services.AddControllersWithViews();
-
 builder.Services.AddSignalR();
+builder.Services.AddScoped<TiendaService>();
 
+// --- LÓGICA DE BASE DE DATOS MEJORADA ---
 if (builder.Environment.IsDevelopment())
 {
-    // Ambiente de Desarrollo (tu máquina local)
-    // Usa la base de datos SQLite.
+    // Para desarrollo local, usa SQLite
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 }
 else
 {
-    // Ambiente de Producción (cuando se publica en Render)
-    // Usa la base de datos PostgreSQL.
+    // Para producción (Render), lee la variable de entorno
+    var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__ProductionConnection");
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseNpgsql(builder.Configuration.GetConnectionString("ProductionConnection")));
+        options.UseNpgsql(connectionString));
 }
 
-builder.Services.AddScoped<PizzeriaOnline.Services.TiendaService>();
-
+// --- CONFIGURACIÓN DE IDENTIDAD Y SESIÓN ---
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
-
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromSeconds(30);
+    options.IdleTimeout = TimeSpan.FromHours(4); // Aumentamos el tiempo
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+// --- CONFIGURACIÓN DEL PIPELINE HTTP ---
+if (app.Environment.IsDevelopment())
 {
-    var services = scope.ServiceProvider;
-    try
-    {
-        var context = services.GetRequiredService<ApplicationDbContext>();
-        context.Database.Migrate();
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Ocurrió un error al sembrar la base de datos.");
-    }
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
-
 app.UseSession();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapRazorPages();
-
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
